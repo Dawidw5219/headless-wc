@@ -1,0 +1,11 @@
+{
+  "name": "headless-wc",
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "build": "grunt"
+  },
+  "devDependencies": {
+    "grunt": "^1.6.1",
+    "grunt-contrib-compress": "^2.0.0"
+  }
+}
