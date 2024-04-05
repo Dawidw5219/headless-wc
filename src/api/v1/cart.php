@@ -1,5 +1,5 @@
 <?php
-function handle_cart_request(WP_REST_Request $request)
+function headlesswc_handle_cart_request(WP_REST_Request $request)
 {
     try {
         $data = $request->get_json_params();

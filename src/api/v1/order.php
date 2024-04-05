@@ -1,5 +1,5 @@
 <?php
-function handle_order_request(WP_REST_Request $request)
+function headlesswc_handle_order_request(WP_REST_Request $request)
 {
     try {
         $data = $request->get_json_params();
@@ -21,18 +21,18 @@ function handle_order_request(WP_REST_Request $request)
             $order->save();
         }
 
-        if (!apply_cart_products($data['cart'], $order)) {
+        if (!headlesswc_apply_cart_products($data['cart'], $order)) {
             return new WP_REST_Response(['error' => 'No valid products in order'], 400);
         }
 
-        $order->set_address(map_customer_data($data), 'billing');
-        $order->set_address(!empty($data['use_different_shipping']) ? map_customer_data($data, true) : map_customer_data($data), 'shipping');
+        $order->set_address(headlesswc_map_customer_data($data), 'billing');
+        $order->set_address(!empty($data['use_different_shipping']) ? headlesswc_map_customer_data($data, true) : headlesswc_map_customer_data($data), 'shipping');
 
-        if (!apply_shipping_method($data['shipping_method_id'], $order)) {
+        if (!headlesswc_apply_shipping_method($data['shipping_method_id'], $order)) {
             return new WP_REST_Response(['error' => 'Invalid or non-existent shipping method'], 400);
         }
 
-        apply_cupon($data['coupon_code'], $order);
+        headlesswc_apply_cupon($data['coupon_code'], $order);
 
 
         $payment_method = sanitize_text_field($data['payment_method_id'] ?? '');
@@ -64,7 +64,7 @@ function handle_order_request(WP_REST_Request $request)
     }
 }
 
-function map_customer_data($data, $is_shipping = false)
+function headlesswc_map_customer_data($data, $is_shipping = false)
 {
     $prefix = $is_shipping ? 'shipping_' : 'billing_';
     return [
@@ -82,7 +82,7 @@ function map_customer_data($data, $is_shipping = false)
     ];
 }
 
-function apply_shipping_method($shipping_method_id, $order)
+function headlesswc_apply_shipping_method($shipping_method_id, $order)
 {
     if (empty($shipping_method_id)) {
         return false;
@@ -104,7 +104,7 @@ function apply_shipping_method($shipping_method_id, $order)
     return false;
 }
 
-function apply_cupon($coupon_code, $order)
+function headlesswc_apply_cupon($coupon_code, $order)
 {
     if (empty($coupon_code) || !is_string($coupon_code))
         return false;
@@ -114,7 +114,7 @@ function apply_cupon($coupon_code, $order)
     return true;
 }
 
-function apply_cart_products($cart, $order)
+function headlesswc_apply_cart_products($cart, $order)
 {
     if (empty($cart) || !is_array($cart)) {
         return false;

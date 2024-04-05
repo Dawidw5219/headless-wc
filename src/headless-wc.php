@@ -2,7 +2,7 @@
 /**
  * Plugin Name: HeadlessWC: Ultimate eCommerce Decoupler
  * Description: Custom WC endpoints for headless checkout
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Dawid Wiewiórski
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -12,8 +12,8 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-add_action('plugins_loaded', 'check_woocommerce_active', 0);
-function check_woocommerce_active()
+add_action('plugins_loaded', 'headlesswc_check_woocommerce_active', 0);
+function headlesswc_check_woocommerce_active()
 {
 	include_once(ABSPATH . 'wp-admin/includes/plugin.php');
 	if (!class_exists('WooCommerce')) {
@@ -26,8 +26,8 @@ function check_woocommerce_active()
 	}
 }
 
-require_once 'v1/cart.php';
-require_once 'v1/order.php';
+require_once 'api/v1/cart.php';
+require_once 'api/v1/order.php';
 
 add_action('rest_api_init', function () {
 	register_rest_route(
@@ -35,7 +35,7 @@ add_action('rest_api_init', function () {
 		'/cart',
 		array (
 			'methods' => 'POST',
-			'callback' => 'handle_cart_request',
+			'callback' => 'headlesswc_handle_cart_request',
 		)
 	);
 
@@ -44,15 +44,15 @@ add_action('rest_api_init', function () {
 		'/order',
 		array (
 			'methods' => 'POST',
-			'callback' => 'handle_order_request',
+			'callback' => 'headlesswc_handle_order_request',
 		)
 	);
 });
 
 
 
-add_action('template_redirect', 'custom_redirect_after_order_received');
-function custom_redirect_after_order_received()
+add_action('template_redirect', 'headlesswc_redirect_after_order_received');
+function headlesswc_redirect_after_order_received()
 {
 	if (is_wc_endpoint_url('order-received')) {
 		$order_id = isset($GLOBALS['wp']->query_vars['order-received']) ? intval($GLOBALS['wp']->query_vars['order-received']) : false;
