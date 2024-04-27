@@ -6,7 +6,7 @@
     "git": "git add . && git commit -m 'update' && git push origin main",
     "build": "grunt build",
     "dev": "grunt --output='/Users/dawid/Local Sites/checkout-field-validator/app/public/wp-content/plugins/'",
-    "deploy": "svn add * --force && svn commit -m 'update'"
+    "deploy": "svn add * --force && svn commit -m 'update' && yarn git"
   },
   "devDependencies": {
     "grunt": "^1.6.1",
