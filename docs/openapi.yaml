@@ -1,0 +1,268 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: HeadlessWC
+paths:
+  /wp-json/headless-wc/v1/cart:
+    post:
+      summary: Get cart details
+      description: Adds items to the shopping cart and applies a coupon code.
+      tags:
+        - Cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cart:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 15
+                      quantity:
+                        type: integer
+                        example: 1
+                couponCode:
+                  type: string
+                  example: GRILL
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  products:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 15
+                        name:
+                          type: string
+                          example: "Sample Product"
+                        img:
+                          type: string
+                          example: "https://picsum.photos/300"
+                        fullImg:
+                          type: string
+                          example: "https://picsum.photos/1280/720"
+                        quantity:
+                          type: integer
+                          example: 1
+                        price:
+                          type: number
+                          format: float
+                          example: 89.99
+                        regularPrice:
+                          type: number
+                          format: float
+                          example: 89.99
+                        salePrice:
+                          type: number
+                          format: float
+                          example: 89.99
+                        isOnsale:
+                          type: boolean
+                          example: false
+                        total:
+                          type: number
+                          format: float
+                          example: 71.99
+                        tax:
+                          type: number
+                          format: float
+                          example: 0
+                  subtotal:
+                    type: number
+                    format: float
+                    example: 89.99
+                  total:
+                    type: number
+                    format: float
+                    example: 88.98
+                  taxTotal:
+                    type: number
+                    format: float
+                    example: 0
+                  shippingTotal:
+                    type: number
+                    format: float
+                    example: 16.99
+                  discountTotal:
+                    type: number
+                    format: float
+                    example: 18
+                  couponCode:
+                    type: string
+                    example: "GRILL"
+                  currency:
+                    type: string
+                    example: "PLN"
+                  availableShippingMethods:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        id:
+                          type: string
+                        price:
+                          type: number
+                          format: float
+                          example: 16.99
+                        tax:
+                          type: number
+                          format: float
+                          example: 0
+                        zone:
+                          type: string
+                          example: "Poland"
+                        locations:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              type:
+                                type: string
+                                example: "country"
+                              code:
+                                type: string
+                                example: "PL"
+                  availablePaymentMethods:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: "stripe"
+                        title:
+                          type: string
+                          example: "Stripe"
+                        description:
+                          type: string
+                          example: "Pay with Stripe"
+  /wp-json/headless-wc/v1/order:
+    post:
+      summary: Make an order
+      description: Adds items to the shopping cart and applies a coupon code.
+      tags:
+        - Order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                redirect_url:
+                  type: string
+                  format: uri
+                  example: https://example.com/thank-you-page/
+                cart:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 15
+                      quantity:
+                        type: integer
+                        example: 1
+                coupon_code:
+                  type: string
+                  example: ""
+                total:
+                  type: number
+                  format: double
+                  example: 89.99
+                shipping_method_id:
+                  type: string
+                  example: "flat_rate:4"
+                payment_method_id:
+                  type: string
+                  example: "stripe"
+                use_different_shipping:
+                  type: boolean
+                  example: false
+                billing_first_name:
+                  type: string
+                  example: "John"
+                billing_last_name:
+                  type: string
+                  example: "Doe"
+                billing_address_1:
+                  type: string
+                  example: "123 Main St"
+                billing_address_2:
+                  type: string
+                  example: ""
+                billing_city:
+                  type: string
+                  example: "New York"
+                billing_state:
+                  type: string
+                  example: "NY"
+                billing_postcode:
+                  type: string
+                  example: "10001"
+                billing_country:
+                  type: string
+                  example: "USA"
+                billing_phone:
+                  type: string
+                  example: "123-456-7890"
+                billing_email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+              required:
+                - cart
+                - total
+                - shipping_method_id
+                - payment_method_id
+                - redirect_url
+                - billing_first_name
+                - billing_last_name
+                - billing_address_1
+                - billing_city
+                - billing_postcode
+                - billing_country
+                - billing_phone
+                - billing_email
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  orderId:
+                    type: integer
+                    example: 1180
+                  paymentUrl:
+                    type: string
+                    format: uri
+                    example: https://example.com/order/order-pay/1180/?key=wc_order_Ugdf2Px7xD4m
+                required:
+                  - success
+                  - orderId
+                  - paymentUrl

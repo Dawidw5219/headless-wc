@@ -1,0 +1,18 @@
+{
+  "name": "headless-wc",
+  "version": "1.0.2",
+  "license": "GPL-2.0-or-later",
+  "scripts": {
+    "git": "git add . && git commit -m 'update' && git push origin main",
+    "build": "grunt build",
+    "dev": "grunt --output='/Users/dawid/Local Sites/checkout-field-validator/app/public/wp-content/plugins/'",
+    "deploy": "svn add * --force && svn commit -m 'update'"
+  },
+  "devDependencies": {
+    "grunt": "^1.6.1",
+    "grunt-contrib-compress": "^2.0.0",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-watch": "^1.1.0",
+    "grunt-replace": "^2.0.2"
+  }
+}
