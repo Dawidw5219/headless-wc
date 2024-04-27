@@ -2,7 +2,7 @@
 /**
  * Plugin Name: HeadlessWC: Ultimate eCommerce Decoupler
  * Description: Custom WC endpoints for headless checkout
- * Version: 1.0.3
+ * Version: 1.0.2
  * Author: Dawid Wiewiórski
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 add_action('plugins_loaded', 'headlesswc_check_woocommerce_active', 0);
 function headlesswc_check_woocommerce_active()
 {
-	include_once (ABSPATH . 'wp-admin/includes/plugin.php');
+	include_once(ABSPATH . 'wp-admin/includes/plugin.php');
 	if (!class_exists('WooCommerce')) {
 		if (is_plugin_active(plugin_basename(__FILE__))) {
 			deactivate_plugins(plugin_basename(__FILE__));
