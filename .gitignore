@@ -1,4 +1,3 @@
-/.vscode
-/node_modules
-.DS_Store
-yarn.lock
+# Dir for bundles
+dist
+node_modules

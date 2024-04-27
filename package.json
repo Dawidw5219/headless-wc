@@ -1,11 +1,13 @@
 {
-  "name": "headless-wc",
-  "license": "GPL-2.0-or-later",
-  "scripts": {
-    "build": "grunt"
+  "name": "headlesswc",
+  "version": "1.0.0",
+  "dependencies": {
+    "@redocly/openapi-cli": "^1.0.0-beta.95"
   },
-  "devDependencies": {
-    "grunt": "^1.6.1",
-    "grunt-contrib-compress": "^2.0.0"
+  "private": true,
+  "scripts": {
+    "start": "openapi preview-docs",
+    "build": "openapi bundle -o dist",
+    "test": "openapi lint"
   }
 }
