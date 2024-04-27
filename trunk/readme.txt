@@ -24,6 +24,10 @@ HeadlessWC transforms your eCommerce approach by providing custom eCommerce endp
 
 == Frequently Asked Questions ==
 
+= API Documentation =
+
+[https://dawidw5219.github.io/headless-wc/](https://dawidw5219.github.io/headless-wc/)
+
 = Do I need technical expertise to use this plugin? =
 
 While Headless WC is built with simplicity in mind, basic knowledge of headless architecture will help you maximize its potential.
