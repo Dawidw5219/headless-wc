@@ -117,8 +117,10 @@ paths:
                       properties:
                         name:
                           type: string
+                          example: "FedEx Shipping"
                         id:
                           type: string
+                          example: "flat_rate:4"
                         price:
                           type: number
                           format: float
