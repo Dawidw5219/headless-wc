@@ -6,7 +6,7 @@ Tested up to: 6.4.3
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 
 The ultimate solution for integrating headless checkout functionalities into your WC store
 
