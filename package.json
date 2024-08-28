@@ -1,6 +1,5 @@
 {
   "name": "headless-wc",
-  "version": "1.0.4",
   "license": "GPL-2.0-or-later",
   "scripts": {
     "git": "git add . && git commit -m 'update' && git push origin main",
