@@ -2,7 +2,7 @@
 /**
  * Plugin Name: HeadlessWC: Ultimate eCommerce Decoupler
  * Description: Custom WC endpoints for headless checkout
- * Version: 1.0.4
+ * Version: 1.0.5
  * Author: Dawid Wiewiórski
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -32,6 +32,7 @@ require_once 'api/v1/products/get-all-products.php';
 require_once 'api/v1/products/get-single-product.php';
 
 add_action('rest_api_init', function () {
+
 	if (!class_exists('WooCommerce') || !WC()->cart) {
 		WC()->initialize_session();
 		WC()->initialize_cart();
