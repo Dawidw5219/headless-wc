@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 add_action('plugins_loaded', 'headlesswc_check_woocommerce_active', 0);
 function headlesswc_check_woocommerce_active()
 {
-	include_once (ABSPATH . 'wp-admin/includes/plugin.php');
+	include_once(ABSPATH . 'wp-admin/includes/plugin.php');
 	if (!class_exists('WooCommerce')) {
 		if (is_plugin_active(plugin_basename(__FILE__))) {
 			deactivate_plugins(plugin_basename(__FILE__));
@@ -28,12 +28,19 @@ function headlesswc_check_woocommerce_active()
 
 require_once 'api/v1/cart.php';
 require_once 'api/v1/order.php';
+require_once 'api/v1/products/get-all-products.php';
+require_once 'api/v1/products/get-single-product.php';
+
+if (!class_exists('WooCommerce') || !WC()->cart) {
+	WC()->initialize_session();
+	WC()->initialize_cart();
+}
 
 add_action('rest_api_init', function () {
 	register_rest_route(
 		'headless-wc/v1',
 		'/cart',
-		array (
+		array(
 			'methods' => 'POST',
 			'callback' => 'headlesswc_handle_cart_request',
 		)
@@ -42,11 +49,25 @@ add_action('rest_api_init', function () {
 	register_rest_route(
 		'headless-wc/v1',
 		'/order',
-		array (
+		array(
 			'methods' => 'POST',
 			'callback' => 'headlesswc_handle_order_request',
 		)
 	);
+
+	register_rest_route(
+		'headless-wc/v1',
+		'/products',
+		array(
+			'methods' => 'GET',
+			'callback' => 'headlesswc_handle_products_request',
+		)
+	);
+
+	register_rest_route('headless-wc/v1', '/products/(?P<slug>[a-zA-Z0-9-]+)', array(
+		'methods' => 'GET',
+		'callback' => 'headlesswc_handle_product_request',
+	));
 });
 
 
