@@ -31,12 +31,12 @@ require_once 'api/v1/order.php';
 require_once 'api/v1/products/get-all-products.php';
 require_once 'api/v1/products/get-single-product.php';
 
-if (!class_exists('WooCommerce') || !WC()->cart) {
-	WC()->initialize_session();
-	WC()->initialize_cart();
-}
-
 add_action('rest_api_init', function () {
+	if (!class_exists('WooCommerce') || !WC()->cart) {
+		WC()->initialize_session();
+		WC()->initialize_cart();
+	}
+
 	register_rest_route(
 		'headless-wc/v1',
 		'/cart',
