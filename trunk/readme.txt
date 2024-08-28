@@ -11,9 +11,12 @@ Stable tag: 1.0.3
 The ultimate solution for integrating headless checkout functionalities into your WC store
 
 == Description ==
-HeadlessWC transforms your eCommerce approach by providing custom eCommerce endpoints for a headless checkout experience. This revolutionary plugin is designed to cater to the evolving needs of online stores that seek agility, speed, and an enhanced user experience without the constraints of traditional eCommerce platforms.
+HeadlessWC revolutionizes your eCommerce approach by providing custom eCommerce endpoints for a headless checkout experience. This cutting-edge plugin is tailored for online stores seeking agility, speed, and an enhanced user experience, free from the limitations of traditional Wordpress approach.
 
-[API Documentation](https://dawidw5219.github.io/headless-wc/)
+It is highly recommended to use the [NPM Client Package](https://www.npmjs.com/package/headless-wc-client), which serves as the client SDK for this WordPress plugin. The package is JavaScript framework-agnostic, allowing you to integrate it seamlessly with your preferred technologies, including React, Vue, Angular, Svelte, and others. This flexibility ensures you can leverage HeadlessWC with any front-end setup, enhancing your headless eCommerce capabilities with ease.
+
+For detailed API integration, please refer to the API [API Documentation](https://dawidw5219.github.io/headless-wc/)
+
 
 == Installation ==
 
