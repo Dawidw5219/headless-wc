@@ -5,3 +5,4 @@ HeadlessWC transforms your eCommerce approach by providing custom eCommerce endp
 [WordPress Plugin Site](https://wordpress.org/plugins/headless-wc/)
 
 [API Documentation](https://dawidw5219.github.io/headless-wc/)
+[NPM Client Package](https://www.npmjs.com/package/headless-wc-client)
