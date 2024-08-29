@@ -62,13 +62,12 @@ function headlesswc_handle_product_request(WP_REST_Request $request)
         ),
         'categories' => wp_get_post_terms($wc_product->get_id(), 'product_cat', array('fields' => 'names')),
         'tags' => wp_get_post_terms($wc_product->get_id(), 'product_tag', array('fields' => 'names')),
-        'executionTime' => microtime(true) - $startTimer,
-
     );
 
     return new WP_REST_Response(array(
         'success' => true,
         'product' => $product_data,
+        'executionTime' => microtime(true) - $startTimer,
     ), 200);
 }
 

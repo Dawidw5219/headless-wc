@@ -73,8 +73,6 @@ function headlesswc_handle_products_request(WP_REST_Request $request)
             'shortDescription' => $wc_product->get_short_description(),
             'categories' => wp_get_post_terms($wc_product->get_id(), 'product_cat', array('fields' => 'names')),
             'tags' => wp_get_post_terms($wc_product->get_id(), 'product_tag', array('fields' => 'names')),
-            'executionTime' => microtime(true) - $startTimer,
-
         );
     }
 
@@ -86,6 +84,7 @@ function headlesswc_handle_products_request(WP_REST_Request $request)
         'currentPage' => $args['paged'],
         'totalPages' => $total_pages,
         'products' => $product_data,
+        'executionTime' => microtime(true) - $startTimer,
     ), 200);
 }
 
