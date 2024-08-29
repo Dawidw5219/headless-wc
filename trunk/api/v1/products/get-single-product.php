@@ -55,7 +55,10 @@ function headlesswc_handle_product_request(WP_REST_Request $request)
         'salePrice' => $wc_product->get_sale_price(),
         'isOnsale' => $wc_product->is_on_sale(),
         'stockStatus' => $wc_product->get_stock_status(),
-        'excerpt' => $wc_product->get_short_description(),
+        'shortDescription' => array(
+            'rendered' => wp_kses_post($wc_product->get_short_description()),
+            'plain' => wp_strip_all_tags($wc_product->get_short_description()),
+        ),
         'content' => array(
             'rendered' => wp_kses_post($wc_product->get_description()),
             'plain' => wp_strip_all_tags($wc_product->get_description()),
