@@ -2,7 +2,7 @@
 /**
  * Plugin Name: HeadlessWC: Ultimate eCommerce Decoupler
  * Description: Custom WC endpoints for headless checkout
- * Version: 1.0.6
+ * Version: 1.0.7
  * Author: Dawid Wiewiórski
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html

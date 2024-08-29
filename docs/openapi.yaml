@@ -3,6 +3,102 @@ info:
   version: 1.0.0
   title: HeadlessWC
 paths:
+  /wp-json/headless-wc/v1/products:
+    get:
+      summary: Get a list of products
+      description: Fetches a list of products from the LifeMeansBeauty shop.
+      tags:
+        - Products
+      responses:
+        "200":
+          description: A list of products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates whether the request was successful
+                    example: true
+                  totalProducts:
+                    type: integer
+                    description: Total number of products
+                    example: 10
+                  currency:
+                    type: string
+                    description: Currency code
+                    example: PLN
+                  currentPage:
+                    type: integer
+                    description: Current page number
+                    example: 1
+                  totalPages:
+                    type: integer
+                    description: Total number of pages
+                    example: 1
+                  products:
+                    type: array
+                    description: List of products
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Product ID
+                          example: 53
+                        name:
+                          type: string
+                          description: Product name
+                          example: Sit.
+                        fullImg:
+                          type: string
+                          description: URL to the full image of the product
+                          example: https://shop.lifemeansbeauty.com/wp-content/uploads/2024/08/wp_dummy_content_generator_53.jpg
+                        permalink:
+                          type: string
+                          description: Permalink to the product
+                          example: https://shop.lifemeansbeauty.com/product/sit/
+                        slug:
+                          type: string
+                          description: Slug of the product
+                          example: sit
+                        price:
+                          type: string
+                          description: Current price of the product
+                          example: "25.67"
+                        regularPrice:
+                          type: string
+                          description: Regular price of the product
+                          example: "25.67"
+                        salePrice:
+                          type: string
+                          description: Sale price of the product
+                          example: "24.67"
+                        isOnsale:
+                          type: boolean
+                          description: Indicates if the product is on sale
+                          example: true
+                        stockStatus:
+                          type: string
+                          description: Stock status of the product
+                          example: instock
+                        shortDescription:
+                          type: string
+                          description: Short description of the product
+                          example: ""
+                        categories:
+                          type: array
+                          description: Categories of the product
+                          items:
+                            type: string
+                            example: Uncategorized
+                        tags:
+                          type: array
+                          description: Tags associated with the product
+                          items:
+                            type: string
+                            example: []
   /wp-json/headless-wc/v1/cart:
     post:
       summary: Get cart details
