@@ -2,14 +2,41 @@
 /**
  * Plugin Name: HeadlessWC: Ultimate eCommerce Decoupler
  * Description: Custom WC endpoints for headless checkout
- * Version: 1.0.9
+ * Version: 1.1.0
  * Author: Dawid Wiewiórski
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Requires PHP: 7.4
  */
 
 if (!defined('ABSPATH')) {
 	exit;
+}
+
+if (!class_exists('HeadlessWC')) {
+	class HeadlessWC
+	{
+		public function __construct()
+		{
+			define('HEADLESSWC_PATH', plugin_dir_path(__FILE__));
+			include_once(HEADLESSWC_PATH . 'api/create-cart.php');
+			include_once(HEADLESSWC_PATH . 'api/create-order.php');
+			include_once(HEADLESSWC_PATH . 'api/get-all-products.php');
+			include_once(HEADLESSWC_PATH . 'api/get-single-product.php');
+			include_once(HEADLESSWC_PATH . 'utilities/get-image-sizes.php');
+			include_once(HEADLESSWC_PATH . 'classes/product.php');
+			include_once(HEADLESSWC_PATH . 'classes/simple-product.php');
+			include_once(HEADLESSWC_PATH . 'classes/variable-product.php');
+		}
+	}
+	new HeadlessWC;
+}
+
+if (!function_exists('nvl')) {
+	function nvl($value, $default = null)
+	{
+		return !empty($value) ? $value : $default;
+	}
 }
 
 add_action('plugins_loaded', 'headlesswc_check_woocommerce_active', 0);
@@ -26,18 +53,11 @@ function headlesswc_check_woocommerce_active()
 	}
 }
 
-require_once 'api/v1/cart.php';
-require_once 'api/v1/order.php';
-require_once 'api/v1/products/get-all-products.php';
-require_once 'api/v1/products/get-single-product.php';
-
 add_action('rest_api_init', function () {
-
 	if (!class_exists('WooCommerce') || !WC()->cart) {
 		WC()->initialize_session();
 		WC()->initialize_cart();
 	}
-
 	register_rest_route(
 		'headless-wc/v1',
 		'/cart',
@@ -46,7 +66,6 @@ add_action('rest_api_init', function () {
 			'callback' => 'headlesswc_handle_cart_request',
 		)
 	);
-
 	register_rest_route(
 		'headless-wc/v1',
 		'/order',
@@ -55,7 +74,6 @@ add_action('rest_api_init', function () {
 			'callback' => 'headlesswc_handle_order_request',
 		)
 	);
-
 	register_rest_route(
 		'headless-wc/v1',
 		'/products',
@@ -64,14 +82,11 @@ add_action('rest_api_init', function () {
 			'callback' => 'headlesswc_handle_products_request',
 		)
 	);
-
 	register_rest_route('headless-wc/v1', '/products/(?P<slug>[a-zA-Z0-9-]+)', array(
 		'methods' => 'GET',
 		'callback' => 'headlesswc_handle_product_request',
 	));
 });
-
-
 
 add_action('template_redirect', 'headlesswc_redirect_after_order_received');
 function headlesswc_redirect_after_order_received()

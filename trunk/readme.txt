@@ -46,3 +46,8 @@ Yes, we are committed to keeping our plugin updated with the latest WC releases 
 = v1.0.0 =
 
 Initial version
+
+= v1.1.0 =
+
+Added GET /wp-json/headless-wc/v1/products/
+Added GET /wp-json/headless-wc/v1/products/${productID}

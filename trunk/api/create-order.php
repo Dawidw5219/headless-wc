@@ -1,4 +1,8 @@
 <?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 function headlesswc_handle_order_request(WP_REST_Request $request)
 {
     try {
