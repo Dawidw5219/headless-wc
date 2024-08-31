@@ -3,10 +3,10 @@ Contributors: dawidw11
 Tags: woocommerce, headless, cart, rest-api
 Requires at least: 5.1
 Tested up to: 6.4.3
-Requires PHP: 7.0
+Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Stable tag: 1.0.3
+Stable tag: 1.1.0
 
 The ultimate solution for integrating headless checkout functionalities into your WC store
 

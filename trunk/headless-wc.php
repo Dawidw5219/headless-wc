@@ -1,6 +1,8 @@
 <?php
 /**
  * Plugin Name: HeadlessWC: Ultimate eCommerce Decoupler
+ * Text Domain: headless-wc
+ * Domain Path: /languages
  * Description: Custom WC endpoints for headless checkout
  * Version: 1.1.0
  * Author: Dawid Wiewiórski
@@ -9,101 +11,72 @@
  * Requires PHP: 7.4
  */
 
-if (!defined('ABSPATH')) {
-	exit;
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
 }
 
-if (!class_exists('HeadlessWC')) {
-	class HeadlessWC
-	{
-		public function __construct()
-		{
-			define('HEADLESSWC_PATH', plugin_dir_path(__FILE__));
-			include_once(HEADLESSWC_PATH . 'api/create-cart.php');
-			include_once(HEADLESSWC_PATH . 'api/create-order.php');
-			include_once(HEADLESSWC_PATH . 'api/get-all-products.php');
-			include_once(HEADLESSWC_PATH . 'api/get-single-product.php');
-			include_once(HEADLESSWC_PATH . 'utilities/get-image-sizes.php');
-			include_once(HEADLESSWC_PATH . 'classes/product.php');
-			include_once(HEADLESSWC_PATH . 'classes/simple-product.php');
-			include_once(HEADLESSWC_PATH . 'classes/variable-product.php');
-		}
-	}
-	new HeadlessWC;
-}
+define( 'HEADLESSWC_PATH', plugin_dir_path( __FILE__ ) );
+define( 'HEADLESSWC_URL', plugin_dir_url( __FILE__ ) );
+require_once HEADLESSWC_PATH . 'vendor/autoload.php';
+require_once HEADLESSWC_PATH . 'includes/force_plugin_requirements.php';
+require_once HEADLESSWC_PATH . 'includes/redirect_after_order.php';
+require_once HEADLESSWC_PATH . 'classes/headlesswc.php';
+require_once HEADLESSWC_PATH . 'api/create-cart.php';
+require_once HEADLESSWC_PATH . 'api/create-order.php';
+require_once HEADLESSWC_PATH . 'api/get-all-products.php';
+require_once HEADLESSWC_PATH . 'api/get-single-product.php';
+require_once HEADLESSWC_PATH . 'utilities/get-image-sizes.php';
+require_once HEADLESSWC_PATH . 'classes/product.php';
+require_once HEADLESSWC_PATH . 'classes/simple-product.php';
+require_once HEADLESSWC_PATH . 'classes/variable-product.php';
 
-if (!function_exists('nvl')) {
-	function nvl($value, $default = null)
-	{
-		return !empty($value) ? $value : $default;
-	}
-}
+add_action(
+    'rest_api_init',
+    function () {
+        if ( ! class_exists( 'WooCommerce' ) || ! WC()->cart ) {
+            WC()->initialize_session();
+            WC()->initialize_cart();
+        }
+        register_rest_route(
+            'headless-wc/v1',
+            '/cart',
+            array(
+                'methods' => 'POST',
+                'callback' => 'headlesswc_handle_cart_request',
+            )
+        );
+        register_rest_route(
+            'headless-wc/v1',
+            '/order',
+            array(
+                'methods' => 'POST',
+                'callback' => 'headlesswc_handle_order_request',
+            )
+        );
+        register_rest_route(
+            'headless-wc/v1',
+            '/products',
+            array(
+                'methods' => 'GET',
+                'callback' => 'headlesswc_handle_products_request',
+            )
+        );
+        register_rest_route(
+            'headless-wc/v1',
+            '/products/(?P<slug>[a-zA-Z0-9-]+)',
+            array(
+                'methods' => 'GET',
+                'callback' => 'headlesswc_handle_product_request',
+            )
+        );
+    }
+);
 
-add_action('plugins_loaded', 'headlesswc_check_woocommerce_active', 0);
-function headlesswc_check_woocommerce_active()
-{
-	include_once(ABSPATH . 'wp-admin/includes/plugin.php');
-	if (!class_exists('WooCommerce')) {
-		if (is_plugin_active(plugin_basename(__FILE__))) {
-			deactivate_plugins(plugin_basename(__FILE__));
-			add_action('admin_notices', function () {
-				echo '<div class="error"><p>' . esc_html__("HeadlessWC plugin cannot operate without WooCommerce being enabled. Please install and activate the WooCommerce plugin", "headless-wc-no-woocommerce") . '</p></div>';
-			});
-		}
-	}
-}
-
-add_action('rest_api_init', function () {
-	if (!class_exists('WooCommerce') || !WC()->cart) {
-		WC()->initialize_session();
-		WC()->initialize_cart();
-	}
-	register_rest_route(
-		'headless-wc/v1',
-		'/cart',
-		array(
-			'methods' => 'POST',
-			'callback' => 'headlesswc_handle_cart_request',
-		)
-	);
-	register_rest_route(
-		'headless-wc/v1',
-		'/order',
-		array(
-			'methods' => 'POST',
-			'callback' => 'headlesswc_handle_order_request',
-		)
-	);
-	register_rest_route(
-		'headless-wc/v1',
-		'/products',
-		array(
-			'methods' => 'GET',
-			'callback' => 'headlesswc_handle_products_request',
-		)
-	);
-	register_rest_route('headless-wc/v1', '/products/(?P<slug>[a-zA-Z0-9-]+)', array(
-		'methods' => 'GET',
-		'callback' => 'headlesswc_handle_product_request',
-	));
-});
-
-add_action('template_redirect', 'headlesswc_redirect_after_order_received');
-function headlesswc_redirect_after_order_received()
-{
-	if (is_wc_endpoint_url('order-received')) {
-		$order_id = isset($GLOBALS['wp']->query_vars['order-received']) ? intval($GLOBALS['wp']->query_vars['order-received']) : false;
-		if (!$order_id) {
-			return;
-		}
-		$order = wc_get_order($order_id);
-		if (!$order) {
-			return;
-		}
-		$redirect_url = $order->get_meta('redirect_url');
-		if (!empty($redirect_url)) {
-			wp_redirect($redirect_url);
-			exit;
-		}
-	}
-}
+add_action(
+    'plugins_loaded', 'headlesswc_force_plugin_requirements
+', 0
+);
+add_action(
+    'template_redirect', 'headlesswc_redirect_after_order
+'
+);
