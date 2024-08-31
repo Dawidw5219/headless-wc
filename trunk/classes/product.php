@@ -1,5 +1,5 @@
 <?php
-if ( ! defined( ' ABSPATH ' ) ) {
+if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
@@ -11,20 +11,27 @@ class HWC_Product {
         $this->wc_product = $wc_product;
     }
 
-    protected function get_product_type() {
+    public function get_base_data() {
         switch ( $this->wc_product->get_type() ) {
             case 'variable':
-                return new HWC_Variable_Product( $this->wc_product );
+                $product = new HWC_Variable_Product( $this->wc_product );
+                break;
             default:
-                return new HWC_Simple_Product( $this->wc_product );
+                $product = new HWC_Simple_Product( $this->wc_product );
+                break;
         }
-    }
-
-    public function get_base_data() {
-        return $this->get_product_type()->get_base_data();
+        return $product->get_data();
     }
 
     public function get_detailed_data() {
-        return $this->get_product_type()->get_detailed_data();
+        switch ( $this->wc_product->get_type() ) {
+            case 'variable':
+                $product = new HWC_Variable_Product_Detailed( $this->wc_product );
+                break;
+            default:
+                $product = new HWC_Simple_Product_Detailed( $this->wc_product );
+                break;
+        }
+        return $product->get_data();
     }
 }

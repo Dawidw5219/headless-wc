@@ -4,6 +4,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 function headlesswc_redirect_after_order() {
+	if ( ! function_exists( 'is_wc_endpoint_url' ) ) {
+		return;
+    }
+
 	if ( is_wc_endpoint_url( 'order-received' ) ) {
 		$order_id = isset( $GLOBALS['wp']->query_vars['order-received'] ) ? intval( $GLOBALS['wp']->query_vars['order-received'] ) : false;
 		if ( ! $order_id ) {

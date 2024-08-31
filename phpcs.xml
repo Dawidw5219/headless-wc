@@ -134,4 +134,9 @@
     <rule ref="Squiz.PHP.CommentedOutCode.Found">
         <severity>0</severity>
     </rule>
+
+    <!-- Exclude specific error codes -->
+    <rule ref="Generic.Files.OneObjectStructurePerFile">
+        <exclude name="Generic.Files.OneObjectStructurePerFile.MultipleFound"/>
+    </rule>
 </ruleset>
