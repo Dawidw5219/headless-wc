@@ -8,9 +8,8 @@
     "build": "grunt build",
     "deploy": "yarn build && svn add trunk/* assets/* dist/* composer.json composer.lock --force && svn commit -m 'update' && yarn git",
     "git": "git add . && git commit -m 'update' && git push origin main",
-    "svnignore": "svn propset svn:ignore -F .svnignore .",
-    "svnignore:addDir": "svn propset svn:ignore 'FOLDER_NAME/' .",
-    "svnignore:removeDir": "svn rm --keep-local node_modules",
+    "svnignore:add": "svn propset svn:ignore 'FOLDER_NAME/' .",
+    "svnignore:remove": "svn rm --keep-local node_modules",
     "svnignore:preview": "SVN_EDITOR=nano svn propedit svn:ignore ."
   },
   "devDependencies": {
