@@ -6,10 +6,12 @@
     "dev:ftp": "grunt dev:ftp",
     "dev:local": "grunt dev:local",
     "build": "grunt build",
-    "deploy": "svn add * && svn commit -m 'update' && yarn build && yarn git",
+    "deploy": "svn add trunk/* assets/* --force && svn commit -m 'update' && yarn build && yarn git",
     "git": "git add . && git commit -m 'update' && git push origin main",
     "svnignore": "svn propset svn:ignore -F .svnignore .",
-    "svnignore2": "SVN_EDITOR=nano svn propedit svn:ignore ."
+    "svnignore:addDir": "svn propset svn:ignore 'FOLDER_NAME/' .",
+    "svnignore:removeDir": "svn rm --keep-local node_modules",
+    "svnignore:preview": "SVN_EDITOR=nano svn propedit svn:ignore ."
   },
   "devDependencies": {
     "dotenv": "^16.4.5",
