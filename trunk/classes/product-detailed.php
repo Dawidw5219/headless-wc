@@ -23,7 +23,6 @@ class HWC_Product_Detailed extends HWC_Product {
     public array $gallery_images = [];
     public array $upsell_ids = [];
     public array $cross_sell_ids = [];
-    public array $meta_data = [];
     public ?array $content = array(
         'rendered' => '',
         'plain' => '',
@@ -37,8 +36,8 @@ class HWC_Product_Detailed extends HWC_Product {
         parent::__construct( $wc_product );
         if ( is_string( $wc_product->get_description ) ) {
             $this->content = [
-                'rendered' => wp_kses_post( $wc_product->get_description ),
-                'plain' => wp_strip_all_tags( $wc_product->get_description ),
+                'rendered' => wp_kses_post( $wc_product->get_description() ),
+                'plain' => wp_strip_all_tags( $wc_product->get_description() ),
             ];
         } else {
             $this->content = null;
@@ -52,8 +51,7 @@ class HWC_Product_Detailed extends HWC_Product {
         $this->gallery_images = headlesswc_get_gallery_images( $wc_product );
         $this->upsell_ids = $wc_product->get_upsell_ids();
         $this->cross_sell_ids = $wc_product->get_cross_sell_ids();
-        $this->meta_data = headlesswc_get_meta_data( $wc_product );
-        // 'product_meta' => get_post_meta($wc_product->get_id()),
+        //$this->meta_data = headlesswc_get_meta_data( $wc_product );
         //'allData' => $wc_product->get_data(),
 
         ////////////////////////////////////////////////////////////////////////////////////
@@ -69,8 +67,8 @@ class HWC_Product_Detailed extends HWC_Product {
             $variation = wc_get_product( $variation_id );
             $product = new HWC_Product( $variation );
             $variations[] = [
-                'attributes' => $variation->get_attributes(),
-                'product' => $product->get_data(),
+                'attribute_values' => $variation->get_attributes(),
+                'variation' => $product->get_data(),
             ];
         }
         return $variations;

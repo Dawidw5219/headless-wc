@@ -6,9 +6,10 @@
     "dev:ftp": "grunt dev:ftp",
     "dev:local": "grunt dev:local",
     "build": "grunt build",
-    "deploy": "svn add * --force && svn commit -m 'update' && yarn build && yarn git",
+    "deploy": "svn add * && svn commit -m 'update' && yarn build && yarn git",
     "git": "git add . && git commit -m 'update' && git push origin main",
-    "svnignore": "SVN_EDITOR=nano svn propedit svn:ignore ."
+    "svnignore": "svn propset svn:ignore -F .svnignore .",
+    "svnignore2": "SVN_EDITOR=nano svn propedit svn:ignore ."
   },
   "devDependencies": {
     "dotenv": "^16.4.5",

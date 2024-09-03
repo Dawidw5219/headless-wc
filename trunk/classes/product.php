@@ -9,18 +9,20 @@ class HWC_Product {
     public bool $is_featured;
     public bool $is_sold_individually;
     public int $id;
+    public ?int $stock_quantity;
     public string $name;
     /** @var string Possible values: "simple", "variable", "grouped", "external" */
     public string $type;
     public string $slug;
     public string $permalink;
-    public string $sku;
     public string $currency;
     public string $price;
     public string $regular_price;
     /** @var string Possible values: "onbackorder", "instock", "outofstock" */
     public string $stock_status;
     public ?string $sale_price;
+    public ?string $sku;
+    public ?string $global_unique_id;
     public ?string $sale_start_datetime;
     public ?string $sale_end_datetime;
     /** @var string[] */
@@ -29,16 +31,11 @@ class HWC_Product {
     public ?array $tags;
     /** @var string[] */
     public ?array $image;
-    /** @var string[] */
-    public ?array $stock = array(
-        'quantity' => null,
-        'low_stock_amount' => null,
-        'backorders_status' => null,
-    );
     public ?array $short_description = array(
         'rendered' => '',
         'plain' => '',
     );
+    public ?array $content = null;
     public ?array $attributes = null;
     /**
      * Only if $type is "variable" $variations_ prefixed params will be present
@@ -52,7 +49,8 @@ class HWC_Product {
         $this->type = $wc_product->get_type();
         $this->slug = get_post_field( 'post_name', $wc_product->get_id() );
         $this->permalink = get_permalink( $wc_product->get_id() );
-        $this->sku = $wc_product->get_sku();
+        $this->sku = nvl( $wc_product->get_sku() );
+        $this->global_unique_id = nvl( $wc_product->get_global_unique_id() );
         $this->is_on_sale = $wc_product->is_on_sale();
         $this->currency = get_woocommerce_currency();
         $this->is_virtual = $wc_product->is_virtual();
@@ -71,17 +69,19 @@ class HWC_Product {
         $this->sale_start_datetime = $wc_product->get_date_on_sale_from() ? $wc_product->get_date_on_sale_from()->format( 'c' ) : null;
         $this->sale_end_datetime = $wc_product->get_date_on_sale_to() ? $wc_product->get_date_on_sale_to()->format( 'c' ) : null;
         $this->stock_status = $wc_product->get_stock_status();
-        $this->stock = $wc_product->managing_stock() ? [
-            'quantity' => $wc_product->get_stock_quantity(),
-            'low_stock_amount' => nvl( get_post_meta( $wc_product->get_id(), '_low_stock_amount', true ) ),
-            'backorders_status' => $wc_product->get_backorders(),
-        ] : null;
+        $this->stock_quantity = $wc_product->get_stock_quantity();
         $this->attributes = headlesswc_get_attributes_data( $wc_product );
         ////////////////////////////////////////////////////////////////////////////////////
         if ( $wc_product->get_type() === 'variable' ) {
 			$this->variations_min_price = $wc_product->get_variation_price( 'min', true );
 			$this->variations_max_price = $wc_product->get_variation_price( 'max', true );
 		}
+        if ( $this->type === 'variation' ) {
+            $this->content = [
+                'rendered' => wp_kses_post( $wc_product->get_description() ),
+                'plain' => wp_strip_all_tags( $wc_product->get_description() ),
+            ];
+        }
         ////////////////////////////////////////////////////////////////////////////////////
     }
 
@@ -91,6 +91,12 @@ class HWC_Product {
 			unset( $data['variations_min_price'] );
             unset( $data['variations_max_price'] );
 		}
+        if ( $data['type'] !== 'variation' ) {
+            unset( $data['content'] );
+        }
+        if ( $data['type'] === 'variation' ) {
+            unset( $data['attributes'] );
+        }
         return $data;
     }
 }

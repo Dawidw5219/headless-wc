@@ -50,7 +50,7 @@ function headlesswc_handle_product_request( WP_REST_Request $request ) {
         array(
 			'success' => true,
 			'execution_time' => microtime( true ) - $start_timer,
-			'product' => $product_data,
+			'data' => $product_data,
         ), 200
     );
 }

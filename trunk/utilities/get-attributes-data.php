@@ -5,58 +5,73 @@
  */
 function headlesswc_get_attributes_data( $wc_product ) {
     $attributes_data = [];
+    $all_attributes = wc_get_attribute_taxonomies();
     foreach ( $wc_product->get_attributes() as $attribute ) {
+        if ( is_string( $attribute ) ) {
+            continue;
+        }
         if ( $attribute->is_taxonomy() ) {
             $taxonomy = $attribute->get_taxonomy();
-            $term_ids = $attribute->get_options();
-
-            // Get the taxonomy label to use as the attribute name
             $taxonomy_object = get_taxonomy( $taxonomy );
-            $attribute_name = $taxonomy_object ? $taxonomy_object->labels->singular_name : $attribute->get_name();
-
-            $terms_with_meta = [];
+            $term_ids = $attribute->get_options();
+            // Znajdź typ atrybutu
+            $attribute_type = 'select';
+            foreach ( $all_attributes as $attr ) {
+                if ( 'pa_' . $attr->attribute_name === $taxonomy ) {
+                    $attribute_type = $attr->attribute_type;
+                    break;
+                }
+            }
+            $attribute_values = [];
             foreach ( $term_ids as $term_id ) {
                 $term = get_term( $term_id, $taxonomy );
                 if ( ! is_wp_error( $term ) ) {
-                    $term_name = $term->name;
-                    $term_slug = $term->slug;
-
-                    $terms_with_meta[] = [
-                        'id' => $term_slug,
-                        'name' => $term_name,
+                    $attribute_value = [
+                        'id' => $term->slug,
+                        'name' => $term->name,
+                        //'meta' => get_term_meta( $term_id ),
                     ];
-                }
-            }
+                    if ( $attribute_type === 'image' ) {
+                        $attribute_value['imageUrl'] = get_term_meta( $term_id, 'cfvsw_image', true );
+                    }
+                    if ( $attribute_type === 'color' ) {
+                        $attribute_value['color'] = get_term_meta( $term_id, 'cfvsw_color', true );
+                    }
+                    $attribute_values[] = $attribute_value;
+				}
+			}
             usort(
-                $terms_with_meta,
+                $attribute_values,
                 function ( $a, $b ) {
                     return strcmp( $a['name'], $b['name'] );
                 }
             );
             $attributes_data[] = [
                 'id' => $attribute->get_taxonomy(),
-                'name' => $attribute_name,
-                'values' => $terms_with_meta,
+                'name' => $taxonomy_object->labels->singular_name,
+                'type' => $attribute_type, // select || image || color ||
+                'is_for_variations' => $attribute->get_variation(),
+                'values' => $attribute_values,
             ];
-        } else {
-            // For non-taxonomy (custom) attributes, directly use the options
-            $attribute_values = $attribute->get_options();
-            // Sort values alphabetically
-            sort( $attribute_values );
-            $attributes_data[] = [
-                'id' => strtolower( rawurlencode( $attribute->get_name() ) ) . '-' . random_int( 10000, 99999 ),
-                'name' => $attribute->get_name(),
-                'values' => array_map(
+		} else {
+			$attribute_values = $attribute->get_options();
+			sort( $attribute_values );
+			$attributes_data[] = [
+				'id' => $attribute->get_name(),
+				'name' => $attribute->get_name(),
+				'type' => 'select',
+				'is_for_variations' => $attribute->get_variation() ? 'true' : 'false',
+				'values' => array_map(
                     function ( $value ) {
                         return [
-                            'id' => strtolower( rawurlencode( $value ) ),
+                            'id' => $value,
                             'name' => $value,
                         ];
                     },
                     $attribute_values
                 ),
-            ];
-        }
-    }
+			];
+		}
+	}
     return $attributes_data;
 }

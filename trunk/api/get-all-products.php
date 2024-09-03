@@ -63,7 +63,7 @@ function headlesswc_handle_products_request( WP_REST_Request $request ) {
 			'execution_time' => microtime( true ) - $start_timer,
 			'total_pages' => $query->max_num_pages,
 			'total_products' => $query->found_posts,
-			'products' => $products,
+			'data' => $products,
         ), 200
     );
 }
