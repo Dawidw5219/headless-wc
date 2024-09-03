@@ -6,7 +6,7 @@
     "dev:ftp": "grunt dev:ftp",
     "dev:local": "grunt dev:local",
     "build": "grunt build",
-    "deploy": "svn add trunk/* assets/* --force && svn commit -m 'update' && yarn build && yarn git",
+    "deploy": "yarn build && svn add trunk/* assets/* dist/* composer.json composer.lock --force && svn commit -m 'update' && yarn git",
     "git": "git add . && git commit -m 'update' && git push origin main",
     "svnignore": "svn propset svn:ignore -F .svnignore .",
     "svnignore:addDir": "svn propset svn:ignore 'FOLDER_NAME/' .",
