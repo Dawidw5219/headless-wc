@@ -51,7 +51,7 @@ function headlesswc_handle_products_request( WP_REST_Request $request ) {
     $products = array();
     foreach ( $query->posts as $product ) {
         $product = new HWC_Product( wc_get_product( $product->ID ) );
-        $product_data = $product->get_base_data();
+        $product_data = $product->get_data();
         ksort( $product_data );
         $products[] = $product_data;
     }
@@ -59,7 +59,6 @@ function headlesswc_handle_products_request( WP_REST_Request $request ) {
     return new WP_REST_Response(
         array(
 			'success' => true,
-			'currency' => get_woocommerce_currency(),
 			'current_page' => $args['paged'],
 			'execution_time' => microtime( true ) - $start_timer,
 			'total_pages' => $query->max_num_pages,

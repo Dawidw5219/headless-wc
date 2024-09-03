@@ -8,7 +8,7 @@ License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Stable tag: 1.1.0
 
-The ultimate solution for integrating headless checkout functionalities into your WC store
+The ultimate solution for integrating headless checkout functionalities into your WooCommerce store
 
 == Description ==
 HeadlessWC revolutionizes your eCommerce approach by providing custom eCommerce endpoints for a headless checkout experience. This cutting-edge plugin is tailored for online stores seeking agility, speed, and an enhanced user experience, free from the limitations of traditional Wordpress approach.

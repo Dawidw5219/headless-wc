@@ -25,11 +25,17 @@ require_once HEADLESSWC_PATH . 'api/create-cart.php';
 require_once HEADLESSWC_PATH . 'api/create-order.php';
 require_once HEADLESSWC_PATH . 'api/get-all-products.php';
 require_once HEADLESSWC_PATH . 'api/get-single-product.php';
-require_once HEADLESSWC_PATH . 'utilities/get-image-sizes.php';
-require_once HEADLESSWC_PATH . 'utilities/nvl.php';
 require_once HEADLESSWC_PATH . 'classes/product.php';
-require_once HEADLESSWC_PATH . 'classes/simple-product.php';
-require_once HEADLESSWC_PATH . 'classes/variable-product.php';
+require_once HEADLESSWC_PATH . 'classes/product-detailed.php';
+require_once HEADLESSWC_PATH . 'utilities/get-attributes-data.php';
+require_once HEADLESSWC_PATH . 'utilities/get-attributes.php';
+require_once HEADLESSWC_PATH . 'utilities/get-gallery-images.php';
+require_once HEADLESSWC_PATH . 'utilities/get-image-sizes.php';
+require_once HEADLESSWC_PATH . 'utilities/get-meta-data.php';
+require_once HEADLESSWC_PATH . 'utilities/get-regular-price.php';
+require_once HEADLESSWC_PATH . 'utilities/get-sale-price.php';
+require_once HEADLESSWC_PATH . 'utilities/nvl.php';
+
 
 add_action(
     'rest_api_init',

@@ -42,8 +42,8 @@ function headlesswc_handle_product_request( WP_REST_Request $request ) {
         );
     }
 
-    $product = new HWC_Product( wc_get_product( $products[0]->ID ) );
-    $product_data = $product->get_detailed_data();
+    $product = new HWC_Product_Detailed( wc_get_product( $products[0]->ID ) );
+    $product_data = $product->get_data();
     ksort( $product_data );
 
     return new WP_REST_Response(
