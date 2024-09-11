@@ -3,24 +3,17 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class HWC_Product {
+class HWC_Product extends HWC_Product_Base {
     public bool $is_on_sale;
     public bool $is_virtual;
     public bool $is_featured;
     public bool $is_sold_individually;
     public int $id;
     public ?int $stock_quantity;
-    public string $name;
     /** @var string Possible values: "simple", "variable", "grouped", "external" */
     public string $type;
-    public string $slug;
-    public string $permalink;
-    public string $currency;
-    public string $price;
-    public string $regular_price;
     /** @var string Possible values: "onbackorder", "instock", "outofstock" */
     public string $stock_status;
-    public ?string $sale_price;
     public ?string $sku;
     public ?string $global_unique_id;
     public ?string $sale_start_datetime;
@@ -30,7 +23,6 @@ class HWC_Product {
     /** @var string[] */
     public ?array $tags;
     /** @var string[] */
-    public ?array $image;
     public ?array $short_description = array(
         'rendered' => '',
         'plain' => '',
@@ -44,8 +36,6 @@ class HWC_Product {
     public ?string $variations_max_price = null;
 
     public function __construct( $wc_product ) {
-        $this->name = $wc_product->get_name();
-        $this->id = $wc_product->get_id();
         $this->type = $wc_product->get_type();
         $this->slug = get_post_field( 'post_name', $wc_product->get_id() );
         $this->permalink = get_permalink( $wc_product->get_id() );
@@ -97,6 +87,9 @@ class HWC_Product {
         if ( $data['type'] === 'variation' ) {
             unset( $data['attributes'] );
         }
-        return $data;
+         return [
+            ...parent::get_data(),
+            ...$data,
+        ];
     }
 }

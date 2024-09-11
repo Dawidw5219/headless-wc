@@ -20,33 +20,20 @@ function headlesswc_handle_cart_request( WP_REST_Request $request ) {
             $cart->add_to_cart( $product_id, $quantity );
         }
 
-        if ( isset( $data['couponCode'] ) && ! empty( $data['couponCode'] ) ) {
-            if ( $cart->apply_coupon( $data['couponCode'] ) ) {
+        if ( isset( $data['coupon_code'] ) && ! empty( $data['coupon_code'] ) ) {
+            if ( $cart->apply_coupon( $data['coupon_code'] ) ) {
                 $discount_total = $cart->get_discount_total();
             } else {
-                unset( $data['couponCode'] );
+                unset( $data['coupon_code'] );
             }
         }
         $cart->calculate_totals();
 
         $cart_items = [];
         foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
-            $item_data = $cart_item['data'];
-            $regular_price = $item_data->get_regular_price();
-            $sale_price = $item_data->get_sale_price() ? $item_data->get_sale_price() : $regular_price;
-            $cart_items[] = [
-                'id' => $cart_item['product_id'],
-                'name' => $item_data->get_name(),
-                'img' => wp_get_attachment_image_url( $item_data->get_image_id(), apply_filters( 'single_product_archive_thumbnail_size', 'woocommerceThumbnail' ) ),
-                'fullImg' => wp_get_attachment_url( $item_data->get_image_id() ),
-                'quantity' => $cart_item['quantity'],
-                'price' => $item_data->is_on_sale() ? floatval( $sale_price ) : floatval( $regular_price ),
-                'regularPrice' => floatval( $regular_price ),
-                'salePrice' => floatval( $sale_price ),
-                'isOnsale' => $item_data->is_on_sale(),
-                'total' => $cart_item['line_total'],
-                'tax' => $cart_item['line_tax'],
-            ];
+            $product = new HWC_Cart_Item( $cart_item );
+            $product_data = $product->get_data();
+            $cart_items[] = $product_data;
         }
 
         $shipping_methods = [];
@@ -105,13 +92,13 @@ function headlesswc_handle_cart_request( WP_REST_Request $request ) {
             'products' => $cart_items,
             'subtotal' => floatval( $cart->get_subtotal() ),
             'total' => floatval( $cart->get_total( 'edit' ) ),
-            'taxTotal' => floatval( $cart->get_total_tax() ),
-            'shippingTotal' => floatval( $shipping_methods[0]['price'] ),
-            'discountTotal' => floatval( $discount_total ),
-            'couponCode' => isset( $data['couponCode'] ) ? $data['couponCode'] : '',
+            'tax_total' => floatval( $cart->get_total_tax() ),
+            'shipping_total' => floatval( $shipping_methods[0]['price'] ),
+            'discount_total' => floatval( $discount_total ),
+            'coupon_code' => isset( $data['coupon_code'] ) ? $data['coupon_code'] : '',
             'currency' => $currency,
-            'availableShippingMethods' => $shipping_methods,
-            'availablePaymentMethods' => $payment_methods,
+            'shipping_methods' => $shipping_methods,
+            'payment_methods' => $payment_methods,
         ];
 
         return new WP_REST_Response( $response_data, 200 );
