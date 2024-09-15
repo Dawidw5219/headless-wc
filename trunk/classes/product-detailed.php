@@ -12,7 +12,6 @@ class HWC_Variation {
     public HWC_Product $product;
 }
 
-
 class HWC_Product_Detailed extends HWC_Product {
     public string $weight_unit;
     public string $dimension_unit;

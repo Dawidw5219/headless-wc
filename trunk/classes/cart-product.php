@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
-class HWC_Cart_Item extends HWC_Product_Base {
+class HWC_Cart_Product extends HWC_Product_Base {
     public int $quantity;
     public string $total;
     public string $tax;

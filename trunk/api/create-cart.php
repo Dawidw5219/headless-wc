@@ -14,10 +14,17 @@ function headlesswc_handle_cart_request( WP_REST_Request $request ) {
         foreach ( $data['cart'] as $product ) {
             $product_id = isset( $product['id'] ) ? intval( $product['id'] ) : 0;
             $quantity = isset( $product['quantity'] ) ? intval( $product['quantity'] ) : 1;
+            $variation_id = isset( $product['variation_id'] ) ? intval( $product['variation_id'] ) : 0;
+            $variation = isset( $product['variation'] ) ? $product['variation'] : [];
+
             if ( ! $product_id || $quantity < 1 ) {
                 continue;
             }
-            $cart->add_to_cart( $product_id, $quantity );
+            if ( $variation_id && $product_id ) {
+                $cart->add_to_cart( $product_id, $quantity, $variation_id, $variation );
+            } else {
+                $cart->add_to_cart( $product_id, $quantity );
+            }
         }
 
         if ( isset( $data['coupon_code'] ) && ! empty( $data['coupon_code'] ) ) {
@@ -31,9 +38,8 @@ function headlesswc_handle_cart_request( WP_REST_Request $request ) {
 
         $cart_items = [];
         foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
-            $product = new HWC_Cart_Item( $cart_item );
-            $product_data = $product->get_data();
-            $cart_items[] = $product_data;
+            $product = new HWC_Cart_Product( $cart_item );
+            $cart_items[] = $product->get_data();
         }
 
         $shipping_methods = [];
