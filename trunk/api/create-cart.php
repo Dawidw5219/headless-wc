@@ -4,6 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 function headlesswc_handle_cart_request( WP_REST_Request $request ) {
+    $start_timer = microtime( true );
     try {
         $data = $request->get_json_params();
         $currency = get_woocommerce_currency();
@@ -27,11 +28,11 @@ function headlesswc_handle_cart_request( WP_REST_Request $request ) {
             }
         }
 
-        if ( isset( $data['coupon_code'] ) && ! empty( $data['coupon_code'] ) ) {
-            if ( $cart->apply_coupon( $data['coupon_code'] ) ) {
+        if ( isset( $data['couponCode'] ) && ! empty( $data['couponCode'] ) ) {
+            if ( $cart->apply_coupon( $data['couponCode'] ) ) {
                 $discount_total = $cart->get_discount_total();
             } else {
-                unset( $data['coupon_code'] );
+                unset( $data['couponCode'] );
             }
         }
         $cart->calculate_totals();
@@ -98,13 +99,14 @@ function headlesswc_handle_cart_request( WP_REST_Request $request ) {
             'products' => $cart_items,
             'subtotal' => floatval( $cart->get_subtotal() ),
             'total' => floatval( $cart->get_total( 'edit' ) ),
-            'tax_total' => floatval( $cart->get_total_tax() ),
-            'shipping_total' => floatval( $shipping_methods[0]['price'] ),
-            'discount_total' => floatval( $discount_total ),
-            'coupon_code' => isset( $data['coupon_code'] ) ? $data['coupon_code'] : '',
+            'taxTotal' => floatval( $cart->get_total_tax() ),
+            'shippingTotal' => floatval( $shipping_methods[0]['price'] ),
+            'discountTotal' => floatval( $discount_total ),
+            'couponCode' => isset( $data['couponCode'] ) ? $data['couponCode'] : '',
             'currency' => $currency,
-            'shipping_methods' => $shipping_methods,
-            'payment_methods' => $payment_methods,
+            'shippingMethods' => $shipping_methods,
+            'paymentMethods' => $payment_methods,
+            'executionTime' => microtime( true ) - $start_timer,
         ];
 
         return new WP_REST_Response( $response_data, 200 );

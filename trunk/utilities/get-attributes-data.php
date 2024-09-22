@@ -50,7 +50,7 @@ function headlesswc_get_attributes_data( $wc_product ) {
                 'id' => $attribute->get_taxonomy(),
                 'name' => $taxonomy_object->labels->singular_name,
                 'type' => $attribute_type, // select || image || color ||
-                'is_for_variations' => $attribute->get_variation(),
+                'isForVariations' => $attribute->get_variation(),
                 'values' => $attribute_values,
             ];
 		} else {
@@ -60,7 +60,7 @@ function headlesswc_get_attributes_data( $wc_product ) {
 				'id' => $attribute->get_name(),
 				'name' => $attribute->get_name(),
 				'type' => 'select',
-				'is_for_variations' => $attribute->get_variation() ? 'true' : 'false',
+				'isForVariations' => $attribute->get_variation() ? 'true' : 'false',
 				'values' => array_map(
                     function ( $value ) {
                         return [

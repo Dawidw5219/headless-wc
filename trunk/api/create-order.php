@@ -16,10 +16,10 @@ function headlesswc_handle_order_request( WP_REST_Request $request ) {
             $order->update_meta_data( '_furgonetkaService', sanitize_text_field( 'inpost' ) );
         }
 
-        if ( empty( $data['redirect_url'] ) ) {
+        if ( empty( $data['redirectUrl'] ) ) {
             return new WP_REST_Response( [ 'error' => 'No valid redirect URL (client will be redirected after making payment)' ], 400 );
         } else {
-            $order->add_meta_data( 'redirect_url', $data['redirect_url'], true );
+            $order->add_meta_data( 'redirect_url', $data['redirectUrl'], true );
             $order->save();
         }
 
@@ -28,15 +28,15 @@ function headlesswc_handle_order_request( WP_REST_Request $request ) {
         }
 
         $order->set_address( headlesswc_map_customer_data( $data ), 'billing' );
-        $order->set_address( ! empty( $data['use_different_shipping'] ) ? headlesswc_map_customer_data( $data, true ) : headlesswc_map_customer_data( $data ), 'shipping' );
+        $order->set_address( ! empty( $data['useDifferentShipping'] ) ? headlesswc_map_customer_data( $data, true ) : headlesswc_map_customer_data( $data ), 'shipping' );
 
-        if ( ! headlesswc_apply_shipping_method( $data['shipping_method_id'], $order ) ) {
+        if ( ! headlesswc_apply_shipping_method( $data['shippingMethodId'], $order ) ) {
             return new WP_REST_Response( [ 'error' => 'Invalid or non-existent shipping method' ], 400 );
         }
 
-        headlesswc_apply_cupon( $data['coupon_code'], $order );
+        headlesswc_apply_cupon( $data['couponCode'], $order );
 
-        $payment_method = sanitize_text_field( $data['payment_method_id'] ?? '' );
+        $payment_method = sanitize_text_field( $data['paymentMethodId'] ?? '' );
         if ( ! $payment_method || ! array_key_exists( $payment_method, WC()->payment_gateways->payment_gateways() ) ) {
             return new WP_REST_Response( [ 'error' => 'Invalid payment method' ], 400 );
         }
@@ -45,12 +45,13 @@ function headlesswc_handle_order_request( WP_REST_Request $request ) {
         $order->calculate_totals();
         $client_total = floatval( $data['total'] ?? '0' );
         $server_total = floatval( $order->get_total() );
-        if ( abs( $client_total - $server_total ) > 0.01 ) {
-            if ( isset( $order ) && $order->get_id() > 0 ) {
-                wp_delete_post( $order->get_id(), true );
-            }
-            return new WP_REST_Response( [ 'error' => 'Total mismatch. Client: ' . $client_total . ', Server: ' . $server_total ], 400 );
-        }
+        //Total mismatch error
+        // if ( abs( $client_total - $server_total ) > 0.01 ) {
+        //     if ( isset( $order ) && $order->get_id() > 0 ) {
+        //         wp_delete_post( $order->get_id(), true );
+        //     }
+        //     return new WP_REST_Response( [ 'error' => 'Total mismatch. Client: ' . $client_total . ', Server: ' . $server_total ], 400 );
+        // }
 
         $response_data = [
             'success' => true,
@@ -65,22 +66,21 @@ function headlesswc_handle_order_request( WP_REST_Request $request ) {
 }
 
 function headlesswc_map_customer_data( $data, $is_shipping = false ) {
-    $prefix = $is_shipping ? 'shipping_' : 'billing_';
+    $prefix = $is_shipping ? 'shipping' : 'billing';
     return [
-        'first_name' => sanitize_text_field( $data[ $prefix . 'first_name' ] ?? '' ),
-        'last_name' => sanitize_text_field( $data[ $prefix . 'last_name' ] ?? '' ),
-        'company' => sanitize_text_field( $data[ $prefix . 'company' ] ?? '' ),
-        'email' => sanitize_email( $data[ $prefix . 'email' ] ?? '' ),
-        'phone' => sanitize_text_field( $data[ $prefix . 'phone' ] ?? '' ),
-        'address_1' => sanitize_text_field( $data[ $prefix . 'address_1' ] ?? '' ),
-        'address_2' => sanitize_text_field( $data[ $prefix . 'address_2' ] ?? '' ),
-        'city' => sanitize_text_field( $data[ $prefix . 'city' ] ?? '' ),
-        'state' => sanitize_text_field( $data[ $prefix . 'state' ] ?? '' ),
-        'postcode' => sanitize_text_field( $data[ $prefix . 'postcode' ] ?? '' ),
-        'country' => sanitize_text_field( $data[ $prefix . 'country' ] ?? '' ),
+        'first_name' => sanitize_text_field( $data[ $prefix . 'FirstName' ] ?? '' ),
+        'last_name' => sanitize_text_field( $data[ $prefix . 'LastName' ] ?? '' ),
+        'company' => sanitize_text_field( $data[ $prefix . 'Company' ] ?? '' ),
+        'email' => sanitize_email( $data[ $prefix . 'Email' ] ?? '' ),
+        'phone' => sanitize_text_field( $data[ $prefix . 'Phone' ] ?? '' ),
+        'address_1' => sanitize_text_field( $data[ $prefix . 'Address1' ] ?? '' ),
+        'address_2' => sanitize_text_field( $data[ $prefix . 'Address2' ] ?? '' ),
+        'city' => sanitize_text_field( $data[ $prefix . 'City' ] ?? '' ),
+        'state' => sanitize_text_field( $data[ $prefix . 'State' ] ?? '' ),
+        'postcode' => sanitize_text_field( $data[ $prefix . 'Postcode' ] ?? '' ),
+        'country' => sanitize_text_field( $data[ $prefix . 'Country' ] ?? '' ),
     ];
 }
-//https://shop.lifemeansbeauty.com/wp-json/headless-wc/v1/products
 
 
 function headlesswc_apply_shipping_method( $shipping_method_id, $order ) {
@@ -104,11 +104,11 @@ function headlesswc_apply_shipping_method( $shipping_method_id, $order ) {
     return false;
 }
 
-function headlesswc_apply_cupon( $coupon_code, $order ) {
-    if ( empty( $coupon_code ) || ! is_string( $coupon_code ) ) {
+function headlesswc_apply_cupon( $couponCode, $order ) {
+    if ( empty( $couponCode ) || ! is_string( $couponCode ) ) {
         return false;
     }
-    if ( ! $order->apply_coupon( sanitize_text_field( $coupon_code ) ) ) {
+    if ( ! $order->apply_coupon( sanitize_text_field( $couponCode ) ) ) {
         return false;
     }
     return true;
