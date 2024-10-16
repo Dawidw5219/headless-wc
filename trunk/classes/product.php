@@ -70,10 +70,10 @@ class HWC_Product extends HWC_Product_Base {
         // $this->slug = get_post_field( 'post_name', $wc_product->get_id() );
         $this->sku = nvl( $wc_product->get_sku() );
         $this->globalUniqueId = nvl( $wc_product->get_global_unique_id() );
-        $this->isOnSale = $wc_product->isOnSale();
-        $this->isVirtual = $wc_product->isVirtual();
-        $this->isFeatured = $wc_product->isFeatured();
-        $this->isSoldIndividually = $wc_product->isSoldIndividually();
+        $this->isOnSale = $wc_product->is_on_sale();
+        $this->isVirtual = $wc_product->is_virtual();
+        $this->isFeatured = $wc_product->is_featured();
+        $this->isSoldIndividually = $wc_product->is_sold_individually();
         $this->shortDescription = $wc_product->get_short_description() ? [
             'rendered' => wp_kses_post( $wc_product->get_short_description() ),
             'plain' => wp_strip_all_tags( $wc_product->get_short_description() ),
