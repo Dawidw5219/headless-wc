@@ -89,7 +89,7 @@ function headlesswc_handle_order_details_request(WP_REST_Request $request)
             $value = $meta->value;
 
             // Skip internal WooCommerce meta and our redirect_url
-            if (! str_starts_with($key, '_') && $key !== 'redirect_url') {
+            if (substr($key, 0, 1) !== '_' && $key !== 'redirect_url') {
                 $custom_fields[$key] = $value;
             }
         }
