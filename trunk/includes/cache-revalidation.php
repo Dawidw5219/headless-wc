@@ -68,7 +68,8 @@ function headlesswc_trigger_cache_revalidation($product_id)
     // Przygotuj parametry
     $params = array(
         'slug' => $product->get_slug(),
-        'id' => $product_id
+        'id' => $product_id,
+        'type' => 'product'
     );
 
     // Dodaj parametry do URL

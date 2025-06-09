@@ -57,7 +57,7 @@ When you update any product in WooCommerce, HeadlessWC can automatically notify 
 ### URL Format:
 
 ```
-GET https://yourapp.com/api/revalidate?slug=product-slug&id=123
+GET https://yourapp.com/api/revalidate?slug=product-slug&id=123&type=product
 ```
 
 ### Error Monitoring:
@@ -100,7 +100,7 @@ When your revalidation endpoint fails, you'll see an admin notice like this:
 Product: Example Product (ID: 123)
 Error: HTTP Error 500
 Time: 2024-01-15 14:30:25
-URL: https://yourapp.com/api/revalidate?slug=example-product&id=123
+URL: https://yourapp.com/api/revalidate?slug=example-product&id=123&type=product
 
 Details: Internal Server Error
 
