@@ -22,6 +22,7 @@ HeadlessWC transforms your eCommerce approach by providing custom eCommerce endp
 - **Perfect for Next.js ISR** - Works with Incremental Static Regeneration
 - **Asynchronous requests** - Non-blocking product updates
 - **Configurable endpoint** - Set your own revalidation URL
+- **Error monitoring** - WordPress admin alerts for failed revalidations
 
 ### ✅ Simple Administration
 
@@ -59,6 +60,13 @@ When you update any product in WooCommerce, HeadlessWC can automatically notify 
 GET https://yourapp.com/api/revalidate?slug=product-slug&id=123&action=revalidate&type=product
 ```
 
+### Error Monitoring:
+
+- **WordPress Admin Alerts** - Get notified immediately when revalidation fails
+- **Automatic error cleanup** - Errors older than 24 hours are automatically dismissed
+- **Detailed error info** - See exactly what went wrong with HTTP status codes
+- **One-click settings access** - Fix configuration directly from error alerts
+
 ### Perfect for:
 
 - **Next.js ISR** - Use with `revalidateTag()` or `revalidatePath()`
@@ -80,6 +88,24 @@ export default async function handler(req, res) {
     return res.status(500).send("Error revalidating");
   }
 }
+```
+
+### Error Alert Example:
+
+When your revalidation endpoint fails, you'll see an admin notice like this:
+
+```
+🚨 HeadlessWC Cache Revalidation Error
+
+Product: Example Product (ID: 123)
+Error: HTTP Error 500
+Time: 2024-01-15 14:30:25
+URL: https://yourapp.com/api/revalidate?slug=example-product&id=123
+
+Details: Internal Server Error
+
+Your frontend cache revalidation is not working. Please check your revalidation endpoint.
+[Go to HeadlessWC Settings]
 ```
 
 ## API Endpoints
