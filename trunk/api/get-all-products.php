@@ -3,6 +3,15 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 function headlesswc_handle_products_request( WP_REST_Request $request ) {
+    if (!headlesswc_is_domain_allowed()) {
+        return new WP_REST_Response(
+            array(
+                'success' => false,
+                'error' => 'Forbidden: Domain not whitelisted',
+            ), 403
+        );
+    }
+    
     $start_timer = microtime( true );
     $args = array(
         'post_type' => 'product',

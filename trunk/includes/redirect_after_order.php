@@ -21,7 +21,7 @@ function headlesswc_redirect_after_order()
 		}
 		$redirect_url = $order->get_meta('redirect_url');
 		if (! empty($redirect_url)) {
-			// Add order key and order ID as query parameters
+			// Add order key and order ID as query parameters - fix URL encoding
 			$redirect_url = add_query_arg(array(
 				'order' => $order_id,
 				'key' => $order->get_order_key()
@@ -31,7 +31,7 @@ function headlesswc_redirect_after_order()
 		}
 	}
 
-	// Handle order-pay page (for COD and other offline payment methods)
+	// Handle order-pay page - NEW PHP-based approach for COD
 	if (is_wc_endpoint_url('order-pay')) {
 		$order_id = isset($GLOBALS['wp']->query_vars['order-pay']) ? intval($GLOBALS['wp']->query_vars['order-pay']) : false;
 		if (! $order_id) {
@@ -48,50 +48,28 @@ function headlesswc_redirect_after_order()
 		if (! empty($redirect_url)) {
 			// For already confirmed orders, redirect immediately
 			if (in_array($order->get_status(), array('processing', 'on-hold', 'completed'))) {
-				wp_redirect($redirect_url);
+				$redirect_url_with_params = add_query_arg(array(
+					'order' => $order_id,
+					'key' => $order->get_order_key()
+				), $redirect_url);
+				wp_redirect($redirect_url_with_params);
 				exit;
 			}
 
-			// For COD orders on payment page, inject automatic redirect JavaScript
+			// NEW: PHP-based COD handling - no JavaScript needed
 			if ($payment_method === 'cod' && $order->get_status() === 'pending') {
-				add_action('wp_footer', function () use ($redirect_url, $order_id, $order) {
-					$order_key = $order->get_order_key();
-					// Add order key and order ID as query parameters
-					$redirect_url_with_params = add_query_arg(array(
-						'order' => $order_id,
-						'key' => $order_key
-					), $redirect_url);
-?>
-					<script type="text/javascript">
-						jQuery(document).ready(function($) {
-							// Auto-process COD order
-							var processedKey = 'headless_wc_cod_processed_<?php echo esc_js($order_id); ?>';
+				// Automatically confirm COD order
+				$order->update_status('processing', __('COD order automatically confirmed for headless checkout.', 'headless-wc'));
 
-							if (!sessionStorage.getItem(processedKey)) {
-								sessionStorage.setItem(processedKey, '1');
+				// Add order key and order ID as query parameters
+				$redirect_url_with_params = add_query_arg(array(
+					'order' => $order_id,
+					'key' => $order->get_order_key()
+				), $redirect_url);
 
-								// Find and auto-click the "Place order" or "Pay" button for COD
-								setTimeout(function() {
-									var payButton = $('#place_order, input[name="woocommerce_pay"], .button[name="woocommerce_pay"]');
-									if (payButton.length > 0) {
-										payButton.trigger('click');
-									} else {
-										// If no button found, try to redirect directly
-										window.location.href = '<?php echo esc_js($redirect_url_with_params); ?>';
-									}
-								}, 500);
-							}
-
-							// Listen for successful order placement
-							$(document.body).on('payment_method_selected checkout_place_order_success', function() {
-								setTimeout(function() {
-									window.location.href = '<?php echo esc_js($redirect_url_with_params); ?>';
-								}, 1000);
-							});
-						});
-					</script>
-				<?php
-				});
+				// Immediate redirect - no page content will be displayed
+				wp_redirect($redirect_url_with_params);
+				exit;
 			}
 		}
 	}
@@ -105,8 +83,8 @@ function headlesswc_handle_order_status_change($order_id, $old_status, $new_stat
 	$redirect_url = $order->get_meta('redirect_url');
 	$payment_method = $order->get_payment_method();
 
-	// For COD orders that just got confirmed, trigger redirect on next page load
-	if (!empty($redirect_url) && $payment_method === 'cod' && $old_status === 'pending' && in_array($new_status, array('processing', 'on-hold'))) {
+	// For non-COD orders that just got confirmed, set up redirect for next page load
+	if (!empty($redirect_url) && $payment_method !== 'cod' && $old_status === 'pending' && in_array($new_status, array('processing', 'on-hold', 'completed'))) {
 		// Add order key and order ID as query parameters
 		$redirect_url_with_params = add_query_arg(array(
 			'order' => $order_id,
@@ -117,7 +95,7 @@ function headlesswc_handle_order_status_change($order_id, $old_status, $new_stat
 	}
 }
 
-// Check for pending redirects
+// Check for pending redirects (for non-COD payments)
 add_action('wp_footer', 'headlesswc_check_pending_redirect');
 
 function headlesswc_check_pending_redirect()
@@ -135,12 +113,60 @@ function headlesswc_check_pending_redirect()
 			$redirect_url = get_transient('headlesswc_redirect_' . $order_id);
 			if (!empty($redirect_url)) {
 				delete_transient('headlesswc_redirect_' . $order_id);
-				?>
+?>
 				<script type="text/javascript">
-					window.location.href = '<?php echo esc_js($redirect_url); ?>';
+					window.location.href = <?php echo json_encode($redirect_url); ?>;
 				</script>
 <?php
 			}
+		}
+	}
+}
+
+// NEW: Early redirect hook to catch COD orders before any page content is processed
+add_action('template_redirect', 'headlesswc_early_cod_redirect', 5);
+
+function headlesswc_early_cod_redirect()
+{
+	if (! function_exists('is_wc_endpoint_url') || ! function_exists('wc_get_order')) {
+		return;
+	}
+
+	// Only handle order-pay pages
+	if (! is_wc_endpoint_url('order-pay')) {
+		return;
+	}
+
+	$order_id = isset($GLOBALS['wp']->query_vars['order-pay']) ? intval($GLOBALS['wp']->query_vars['order-pay']) : false;
+	if (! $order_id) {
+		return;
+	}
+
+	$order = wc_get_order($order_id);
+	if (! $order) {
+		return;
+	}
+
+	$redirect_url = $order->get_meta('redirect_url');
+	$payment_method = $order->get_payment_method();
+
+	// Early redirect for COD orders with redirect URL set
+	if (! empty($redirect_url) && $payment_method === 'cod') {
+		// Check if order needs to be confirmed
+		if ($order->get_status() === 'pending') {
+			// Automatically confirm COD order
+			$order->update_status('processing', __('COD order automatically confirmed for headless checkout.', 'headless-wc'));
+		}
+
+		// Always redirect if order is ready and has redirect URL
+		if (in_array($order->get_status(), array('processing', 'on-hold', 'completed'))) {
+			$redirect_url_with_params = add_query_arg(array(
+				'order' => $order_id,
+				'key' => $order->get_order_key()
+			), $redirect_url);
+
+			wp_redirect($redirect_url_with_params);
+			exit;
 		}
 	}
 }
