@@ -364,3 +364,195 @@ paths:
                   - success
                   - orderId
                   - paymentUrl
+  /wp-json/headless-wc/v1/order/{order_id}:
+    get:
+      summary: Get order details
+      description: Retrieves order details using order ID and order key for verification
+      tags:
+        - Order
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: The order ID
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Order key for verification (format: wc_order_xyz...)
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  order:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1180
+                      order_key:
+                        type: string
+                        example: "wc_order_Ugdf2Px7xD4m"
+                      status:
+                        type: string
+                        example: "processing"
+                      currency:
+                        type: string
+                        example: "PLN"
+                      date_created:
+                        type: string
+                        format: date-time
+                        example: "2023-07-01T12:00:00+00:00"
+                      date_modified:
+                        type: string
+                        format: date-time
+                        example: "2023-07-01T12:30:00+00:00"
+                      payment_method:
+                        type: string
+                        example: "cod"
+                      payment_method_title:
+                        type: string
+                        example: "Cash on delivery"
+                      total:
+                        type: number
+                        format: float
+                        example: 89.99
+                      subtotal:
+                        type: number
+                        format: float
+                        example: 71.99
+                      total_tax:
+                        type: number
+                        format: float
+                        example: 0
+                      shipping_total:
+                        type: number
+                        format: float
+                        example: 18.00
+                      discount_total:
+                        type: number
+                        format: float
+                        example: 0
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 15
+                            name:
+                              type: string
+                              example: "Sample Product"
+                            quantity:
+                              type: integer
+                              example: 1
+                            price:
+                              type: number
+                              format: float
+                              example: 71.99
+                            unit_price:
+                              type: number
+                              format: float
+                              example: 71.99
+                            sku:
+                              type: string
+                              example: "SPL001"
+                            image:
+                              type: string
+                              format: uri
+                              example: "https://example.com/image.jpg"
+                      billing:
+                        type: object
+                        properties:
+                          first_name:
+                            type: string
+                            example: "John"
+                          last_name:
+                            type: string
+                            example: "Doe"
+                          company:
+                            type: string
+                            example: ""
+                          address_1:
+                            type: string
+                            example: "123 Main St"
+                          address_2:
+                            type: string
+                            example: ""
+                          city:
+                            type: string
+                            example: "New York"
+                          state:
+                            type: string
+                            example: "NY"
+                          postcode:
+                            type: string
+                            example: "10001"
+                          country:
+                            type: string
+                            example: "USA"
+                          email:
+                            type: string
+                            format: email
+                            example: "john@example.com"
+                          phone:
+                            type: string
+                            example: "123-456-7890"
+                      shipping:
+                        type: object
+                        properties:
+                          first_name:
+                            type: string
+                            example: "John"
+                          last_name:
+                            type: string
+                            example: "Doe"
+                          company:
+                            type: string
+                            example: ""
+                          address_1:
+                            type: string
+                            example: "123 Main St"
+                          address_2:
+                            type: string
+                            example: ""
+                          city:
+                            type: string
+                            example: "New York"
+                          state:
+                            type: string
+                            example: "NY"
+                          postcode:
+                            type: string
+                            example: "10001"
+                          country:
+                            type: string
+                            example: "USA"
+                      customer_note:
+                        type: string
+                        example: "Please ring the doorbell"
+                      custom_fields:
+                        type: object
+                        example:
+                          special_instructions: "Handle with care"
+                          gift_message: "Happy Birthday!"
+                required:
+                  - success
+                  - order
+        "400":
+          description: Bad request - Missing order ID or order key
+        "403":
+          description: Forbidden - Invalid order key
+        "404":
+          description: Not found - Order does not exist

@@ -21,6 +21,11 @@ function headlesswc_redirect_after_order()
 		}
 		$redirect_url = $order->get_meta('redirect_url');
 		if (! empty($redirect_url)) {
+			// Add order key and order ID as query parameters
+			$redirect_url = add_query_arg(array(
+				'order' => $order_id,
+				'key' => $order->get_order_key()
+			), $redirect_url);
 			wp_redirect($redirect_url);
 			exit;
 		}
@@ -51,6 +56,11 @@ function headlesswc_redirect_after_order()
 			if ($payment_method === 'cod' && $order->get_status() === 'pending') {
 				add_action('wp_footer', function () use ($redirect_url, $order_id, $order) {
 					$order_key = $order->get_order_key();
+					// Add order key and order ID as query parameters
+					$redirect_url_with_params = add_query_arg(array(
+						'order' => $order_id,
+						'key' => $order_key
+					), $redirect_url);
 ?>
 					<script type="text/javascript">
 						jQuery(document).ready(function($) {
@@ -67,7 +77,7 @@ function headlesswc_redirect_after_order()
 										payButton.trigger('click');
 									} else {
 										// If no button found, try to redirect directly
-										window.location.href = '<?php echo esc_js($redirect_url); ?>';
+										window.location.href = '<?php echo esc_js($redirect_url_with_params); ?>';
 									}
 								}, 500);
 							}
@@ -75,7 +85,7 @@ function headlesswc_redirect_after_order()
 							// Listen for successful order placement
 							$(document.body).on('payment_method_selected checkout_place_order_success', function() {
 								setTimeout(function() {
-									window.location.href = '<?php echo esc_js($redirect_url); ?>';
+									window.location.href = '<?php echo esc_js($redirect_url_with_params); ?>';
 								}, 1000);
 							});
 						});
@@ -97,8 +107,13 @@ function headlesswc_handle_order_status_change($order_id, $old_status, $new_stat
 
 	// For COD orders that just got confirmed, trigger redirect on next page load
 	if (!empty($redirect_url) && $payment_method === 'cod' && $old_status === 'pending' && in_array($new_status, array('processing', 'on-hold'))) {
+		// Add order key and order ID as query parameters
+		$redirect_url_with_params = add_query_arg(array(
+			'order' => $order_id,
+			'key' => $order->get_order_key()
+		), $redirect_url);
 		// Store redirect flag for next page load
-		set_transient('headlesswc_redirect_' . $order_id, $redirect_url, 300); // 5 minutes expiry
+		set_transient('headlesswc_redirect_' . $order_id, $redirect_url_with_params, 300); // 5 minutes expiry
 	}
 }
 

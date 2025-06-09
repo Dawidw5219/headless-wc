@@ -24,6 +24,7 @@ require_once HEADLESSWC_PATH . 'includes/check-plugin-requirements.php';
 require_once HEADLESSWC_PATH . 'includes/redirect_after_order.php';
 require_once HEADLESSWC_PATH . 'api/create-cart.php';
 require_once HEADLESSWC_PATH . 'api/create-order.php';
+require_once HEADLESSWC_PATH . 'api/get-order-details.php';
 require_once HEADLESSWC_PATH . 'api/get-all-products.php';
 require_once HEADLESSWC_PATH . 'api/get-single-product.php';
 require_once HEADLESSWC_PATH . 'classes/product.php';
@@ -63,6 +64,28 @@ add_action(
                 'callback' => 'headlesswc_handle_order_request',
                 'permission_callback' => '__return_true',
 
+            )
+        );
+        register_rest_route(
+            'headless-wc/v1',
+            '/order/(?P<order_id>\d+)',
+            array(
+                'methods' => 'GET',
+                'callback' => 'headlesswc_handle_order_details_request',
+                'permission_callback' => '__return_true',
+                'args' => array(
+                    'order_id' => array(
+                        'validate_callback' => function ($param, $request, $key) {
+                            return is_numeric($param);
+                        }
+                    ),
+                    'key' => array(
+                        'required' => true,
+                        'validate_callback' => function ($param, $request, $key) {
+                            return !empty($param);
+                        }
+                    ),
+                ),
             )
         );
         register_rest_route(
