@@ -1,84 +1,36 @@
 # HeadlessWC: Ultimate eCommerce Decoupler
 
-Custom WooCommerce endpoints for headless checkout with enhanced order tracking capabilities.
+HeadlessWC transforms your eCommerce approach by providing custom eCommerce endpoints for a headless checkout experience. This revolutionary plugin is designed to cater to the evolving needs of online stores that seek agility, speed, and an enhanced user experience without the constraints of traditional eCommerce platforms.
 
-## New Features
+## Key Features
 
-### ✅ Order Key Integration
+### ✅ Fast & Secure COD Processing
 
-All redirects now include order parameters for secure order tracking:
-
-- `order` - Order ID
-- `key` - WooCommerce order key for verification
-
-### ✅ Order Details API
-
-New endpoint to fetch complete order information using order ID and key.
-
-### ✅ Improved COD (Cash on Delivery) Handling
-
-**NEW: PHP-based COD processing** - No more JavaScript delays!
-
-- **Instant redirect**: COD orders are processed immediately at the server level
-- **No page loading delays**: Users are redirected before any page content is rendered
-- **Automatic order confirmation**: COD orders are automatically set to "processing" status
-- **URL encoding fix**: Proper URL parameter encoding (no more `&amp;` issues)
-
-### ✅ WooCommerce Integration
-
-**NEW: Settings integrated into WooCommerce admin panel**
-
-- **Native WooCommerce Settings**: HeadlessWC tab in WooCommerce → Settings
-- **Configurable options**: Control COD auto-confirmation and order key inclusion
-- **Security settings**: Domain whitelist management
-- **Status information**: Plugin version and API endpoint URLs
+- **Instant PHP-based redirects** - No JavaScript delays (< 100ms)
+- **Automatic order confirmation** - COD orders instantly move to "processing"
+- **Secure order keys** - All redirects include order ID + verification key
 
 ### ✅ Centralized API Security
 
-**NEW: Automatic security for all endpoints** - No manual checks required!
+- **Automatic endpoint protection** - All `/wp-json/headless-wc/v1/*` routes secured
+- **Domain whitelist control** - Restrict access to trusted frontend domains
+- **Future-proof security** - New endpoints automatically inherit protection
 
-- **Centralized domain whitelist**: Automatic check for all HeadlessWC endpoints
-- **WooCommerce requirement check**: Ensures WooCommerce is active before API access
-- **Future-proof**: New endpoints are automatically secured without additional code
+### ✅ Simple Administration
+
+- **WooCommerce submenu integration** - Native admin experience
+- **Minimal configuration** - Only essential settings exposed
+- **Always-on features** - COD auto-confirmation and order keys enabled by default
 
 ## Admin Settings
 
-Navigate to **WooCommerce → Settings → HeadlessWC** to configure:
+Navigate to **WooCommerce → HeadlessWC** to configure:
 
 ### Security Settings
 
-- **Domain Whitelist**: Restrict API access to specific domains
-- **API Access Control**: Secure your headless endpoints
+- **Domain Whitelist**: Restrict API access to specific domains (optional)
 
-### COD Settings
-
-- **Auto-confirm COD Orders**: Enable/disable automatic COD order confirmation
-- **Instant Redirects**: Control immediate redirects for COD payments
-
-### API Settings
-
-- **Include Order Key**: Control whether order keys are added to redirect URLs
-- **Secure Order Verification**: Enable order ID + key parameter inclusion
-
-### Status & Information
-
-- **Plugin Version**: Current HeadlessWC version display
-- **API Base URL**: Your HeadlessWC API endpoint base URL
-
-## Security Architecture
-
-### Centralized Protection
-
-All HeadlessWC API endpoints (`/wp-json/headless-wc/v1/*`) are automatically protected by:
-
-1. **Domain whitelist check** - Only allowed domains can access the API
-2. **WooCommerce availability check** - Ensures WooCommerce is active
-
-### Benefits
-
-- **No manual security code** needed in individual endpoints
-- **Automatic protection** for new endpoints
-- **Consistent security policy** across all API routes
+_Note: COD auto-confirmation and order key inclusion are always enabled for optimal security and performance._
 
 ## API Endpoints
 
@@ -93,7 +45,7 @@ All HeadlessWC API endpoints (`/wp-json/headless-wc/v1/*`) are automatically pro
 - Returns `paymentUrl` for payment processing
 - Automatically redirects to `redirectUrl` with order parameters after payment
 
-### 3. Get Order Details (NEW)
+### 3. Get Order Details
 
 `GET /wp-json/headless-wc/v1/order/{order_id}?key={order_key}`
 
@@ -141,41 +93,27 @@ All HeadlessWC API endpoints (`/wp-json/headless-wc/v1/*`) are automatically pro
 
 ## COD (Cash on Delivery) Support
 
-- ✅ **NEW: PHP-based processing** - Instant server-side order confirmation
-- ✅ **Early redirect hook** - Intercepts before page rendering
-- ✅ **Configurable auto-confirmation** - Control via WooCommerce settings
-- ✅ **Fixed URL encoding** - Proper `&` characters in redirect URLs
-- ✅ **Zero JavaScript dependencies** - Pure server-side implementation
+- ✅ **Instant server-side processing** - No page loading delays
+- ✅ **Always enabled** - No configuration needed
+- ✅ **Automatic order confirmation** - Orders instantly move to "processing" status
+- ✅ **Secure redirects** - Order keys always included for verification
 - ✅ **Works with all offline payment methods**
 
-### Performance Improvements
+## Security Features
 
-**Before (JavaScript-based):**
-
-1. Page loads → DOM ready → Find buttons → Click → Wait → Redirect
-2. **Time**: 1-3 seconds
-
-**Now (PHP-based):**
-
-1. Direct server redirect → Immediate
-2. **Time**: <100ms
+- **Centralized protection** for all HeadlessWC endpoints
+- **Domain whitelist** to restrict API access
+- **Order verification** with secure order keys
+- **WooCommerce dependency check** before API access
 
 ## Installation & Setup
 
 1. **Install the plugin** in your WordPress/WooCommerce site
-2. **Configure settings** in WooCommerce → Settings → HeadlessWC
-3. **Set domain whitelist** for security (optional)
-4. **Enable COD auto-confirmation** for instant redirects
-5. **Use API endpoints** in your headless frontend
+2. **Configure domain whitelist** in WooCommerce → HeadlessWC (optional)
+3. **Use API endpoints** in your headless frontend
 
-## Security
-
-- Order details require both order ID and order key for access
-- Order key acts as a secure token to prevent unauthorized access
-- Compatible with WooCommerce's built-in security model
+_That's it! COD processing and order keys work automatically._
 
 [WordPress Plugin Site](https://wordpress.org/plugins/headless-wc/)
-
 [NPM Client Package](https://www.npmjs.com/package/headless-wc-client)
-
 [API Documentation](https://dawidw5219.github.io/headless-wc/)

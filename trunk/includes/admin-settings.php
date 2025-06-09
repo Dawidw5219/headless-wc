@@ -3,151 +3,80 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-// Dodaj hook'i WooCommerce z późniejszym priorytetem aby WooCommerce był już załadowany
-add_action('init', 'headlesswc_init_admin_settings', 20);
+// Dodaj submenu WooCommerce po załadowaniu WooCommerce
+add_action('admin_menu', 'headlesswc_add_submenu', 60);
 
-function headlesswc_init_admin_settings()
+function headlesswc_add_submenu()
 {
     // Sprawdź czy WooCommerce jest aktywny
     if (!class_exists('WooCommerce')) {
         return;
     }
 
-    // Dodaj hook'i tylko gdy WooCommerce jest już załadowany
-    add_filter('woocommerce_settings_tabs_array', 'headlesswc_add_settings_tab', 50);
-    add_action('woocommerce_settings_tabs_headlesswc', 'headlesswc_settings_tab');
-    add_action('woocommerce_update_options_headlesswc', 'headlesswc_update_settings');
+    // Dodaj submenu do WooCommerce
+    add_submenu_page(
+        'woocommerce',
+        __('HeadlessWC Settings', 'headless-wc'),
+        __('HeadlessWC', 'headless-wc'),
+        'manage_options',
+        'headlesswc-settings',
+        'headlesswc_settings_page'
+    );
 }
 
-/**
- * Dodaj zakładkę HeadlessWC do WooCommerce Settings
- */
-function headlesswc_add_settings_tab($settings_tabs)
+// Hook dla zapisywania ustawień
+add_action('admin_init', 'headlesswc_register_settings');
+
+function headlesswc_register_settings()
 {
-    $settings_tabs['headlesswc'] = __('HeadlessWC', 'headless-wc');
-    return $settings_tabs;
-}
+    register_setting('headlesswc_settings', 'headlesswc_domain_whitelist');
 
-/**
- * Wyświetl ustawienia HeadlessWC
- */
-function headlesswc_settings_tab()
-{
-    woocommerce_admin_fields(headlesswc_get_settings());
-}
-
-/**
- * Zapisz ustawienia HeadlessWC
- */
-function headlesswc_update_settings()
-{
-    woocommerce_update_options(headlesswc_get_settings());
-}
-
-/**
- * Pobierz wszystkie ustawienia HeadlessWC
- */
-function headlesswc_get_settings()
-{
-    $settings = array(
-        array(
-            'name' => __('HeadlessWC Settings', 'headless-wc'),
-            'type' => 'title',
-            'desc' => __('Configure HeadlessWC for your headless eCommerce setup.', 'headless-wc'),
-            'id'   => 'headlesswc_settings'
-        ),
-
-        array(
-            'name' => __('Security Settings', 'headless-wc'),
-            'type' => 'title',
-            'desc' => __('Configure security settings for API access.', 'headless-wc'),
-            'id'   => 'headlesswc_security_settings'
-        ),
-
-        array(
-            'name'     => __('Domain Whitelist', 'headless-wc'),
-            'type'     => 'textarea',
-            'desc'     => __('Enter allowed domains one per line (e.g., example.com). Leave empty to allow all domains.', 'headless-wc'),
-            'id'       => 'headlesswc_domain_whitelist',
-            'css'      => 'height: 120px;',
-            'default'  => '',
-            'desc_tip' => __('Only domains listed here will be able to access HeadlessWC API endpoints. For security, add only your trusted frontend domains.', 'headless-wc'),
-        ),
-
-        array(
-            'name' => __('COD (Cash on Delivery) Settings', 'headless-wc'),
-            'type' => 'title',
-            'desc' => __('Configure how COD orders are handled in headless mode.', 'headless-wc'),
-            'id'   => 'headlesswc_cod_settings'
-        ),
-
-        array(
-            'name'     => __('Auto-confirm COD Orders', 'headless-wc'),
-            'type'     => 'checkbox',
-            'desc'     => __('Automatically confirm COD orders and redirect users immediately', 'headless-wc'),
-            'id'       => 'headlesswc_auto_confirm_cod',
-            'default'  => 'yes',
-            'desc_tip' => __('When enabled, COD orders will be automatically set to "processing" status and users will be redirected instantly without page loading delays.', 'headless-wc'),
-        ),
-
-        array(
-            'name' => __('API Settings', 'headless-wc'),
-            'type' => 'title',
-            'desc' => __('Configure API behavior and responses.', 'headless-wc'),
-            'id'   => 'headlesswc_api_settings'
-        ),
-
-        array(
-            'name'     => __('Include Order Key in Redirects', 'headless-wc'),
-            'type'     => 'checkbox',
-            'desc'     => __('Always include order ID and order key in redirect URLs for secure order verification', 'headless-wc'),
-            'id'       => 'headlesswc_include_order_key',
-            'default'  => 'yes',
-            'desc_tip' => __('When enabled, all redirect URLs will include ?order=123&key=wc_order_xyz for secure order verification in your frontend.', 'headless-wc'),
-        ),
-
-        array(
-            'type' => 'sectionend',
-            'id'   => 'headlesswc_settings'
-        ),
-
-        // Status section
-        array(
-            'name' => __('Status & Information', 'headless-wc'),
-            'type' => 'title',
-            'desc' => __('Current plugin status and information.', 'headless-wc'),
-            'id'   => 'headlesswc_status_settings'
-        ),
-
-        array(
-            'name' => __('Plugin Version', 'headless-wc'),
-            'type' => 'text',
-            'id'   => 'headlesswc_version_display',
-            'default' => '1.1.7',
-            'custom_attributes' => array('readonly' => 'readonly'),
-            'desc' => __('Current HeadlessWC plugin version', 'headless-wc'),
-        ),
-
-        array(
-            'name' => __('API Base URL', 'headless-wc'),
-            'type' => 'text',
-            'id'   => 'headlesswc_api_url_display',
-            'default' => site_url('/wp-json/headless-wc/v1/'),
-            'custom_attributes' => array('readonly' => 'readonly'),
-            'desc' => __('Base URL for HeadlessWC API endpoints', 'headless-wc'),
-        ),
-
-        array(
-            'type' => 'sectionend',
-            'id'   => 'headlesswc_status_settings'
-        )
+    add_settings_section(
+        'headlesswc_security_section',
+        __('Security Settings', 'headless-wc'),
+        'headlesswc_security_section_callback',
+        'headlesswc_settings'
     );
 
-    return apply_filters('headlesswc_settings', $settings);
+    add_settings_field(
+        'headlesswc_domain_whitelist',
+        __('Domain Whitelist', 'headless-wc'),
+        'headlesswc_domain_whitelist_callback',
+        'headlesswc_settings',
+        'headlesswc_security_section'
+    );
+}
+
+function headlesswc_security_section_callback()
+{
+    echo '<p>' . __('Configure security settings for HeadlessWC API access.', 'headless-wc') . '</p>';
+}
+
+function headlesswc_domain_whitelist_callback()
+{
+    $value = get_option('headlesswc_domain_whitelist', '');
+    echo '<textarea name="headlesswc_domain_whitelist" rows="5" cols="50" class="large-text">' . esc_textarea($value) . '</textarea>';
+    echo '<p class="description">' . __('Enter allowed domains one per line (e.g., example.com). Leave empty to allow all domains.', 'headless-wc') . '</p>';
+}
+
+function headlesswc_settings_page()
+{
+?>
+    <div class="wrap">
+        <h1><?php echo __('HeadlessWC Settings', 'headless-wc'); ?></h1>
+        <form method="post" action="options.php">
+            <?php
+            settings_fields('headlesswc_settings');
+            do_settings_sections('headlesswc_settings');
+            submit_button();
+            ?>
+        </form>
+    </div>
+<?php
 }
 
 /**
- * Sprawdź czy domena jest dozwolona (zachowana funkcjonalność)
+ * Sprawdź czy domena jest dozwolona
  */
 function headlesswc_is_domain_allowed()
 {
@@ -177,17 +106,17 @@ function headlesswc_is_domain_allowed()
 }
 
 /**
- * Sprawdź czy auto-potwierdzanie COD jest włączone
+ * Auto-potwierdzanie COD jest zawsze włączone
  */
 function headlesswc_is_auto_confirm_cod_enabled()
 {
-    return get_option('headlesswc_auto_confirm_cod', 'yes') === 'yes';
+    return true; // Zawsze włączone
 }
 
 /**
- * Sprawdź czy dołączanie klucza zamówienia jest włączone
+ * Dołączanie klucza zamówienia jest zawsze włączone
  */
 function headlesswc_is_include_order_key_enabled()
 {
-    return get_option('headlesswc_include_order_key', 'yes') === 'yes';
+    return true; // Zawsze włączone
 }
