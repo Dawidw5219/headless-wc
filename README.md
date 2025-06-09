@@ -39,7 +39,6 @@ New endpoint to fetch complete order information using order ID and key.
 
 - **Centralized domain whitelist**: Automatic check for all HeadlessWC endpoints
 - **WooCommerce requirement check**: Ensures WooCommerce is active before API access
-- **API access logging**: Optional security monitoring for all endpoint access
 - **Future-proof**: New endpoints are automatically secured without additional code
 
 ## Admin Settings
@@ -50,7 +49,6 @@ Navigate to **WooCommerce → Settings → HeadlessWC** to configure:
 
 - **Domain Whitelist**: Restrict API access to specific domains
 - **API Access Control**: Secure your headless endpoints
-- **API Access Logging**: Monitor all API requests for security
 
 ### COD Settings
 
@@ -75,14 +73,12 @@ All HeadlessWC API endpoints (`/wp-json/headless-wc/v1/*`) are automatically pro
 
 1. **Domain whitelist check** - Only allowed domains can access the API
 2. **WooCommerce availability check** - Ensures WooCommerce is active
-3. **Optional access logging** - Track all API requests for monitoring
 
 ### Benefits
 
 - **No manual security code** needed in individual endpoints
 - **Automatic protection** for new endpoints
 - **Consistent security policy** across all API routes
-- **Easy monitoring** with optional logging
 
 ## API Endpoints
 
@@ -170,8 +166,7 @@ All HeadlessWC API endpoints (`/wp-json/headless-wc/v1/*`) are automatically pro
 2. **Configure settings** in WooCommerce → Settings → HeadlessWC
 3. **Set domain whitelist** for security (optional)
 4. **Enable COD auto-confirmation** for instant redirects
-5. **Enable API logging** for security monitoring (optional)
-6. **Use API endpoints** in your headless frontend
+5. **Use API endpoints** in your headless frontend
 
 ## Security
 

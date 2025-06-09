@@ -76,36 +76,3 @@ function headlesswc_check_woocommerce_active($result, $server, $request)
     // WooCommerce jest aktywny - pozwól przejść dalej
     return $result;
 }
-
-/**
- * Logowanie prób dostępu do API (opcjonalne - tylko gdy włączone w ustawieniach)
- */
-add_action('rest_pre_dispatch', 'headlesswc_log_api_access', 15, 3);
-
-function headlesswc_log_api_access($result, $server, $request)
-{
-    // Sprawdź czy to jest nasz endpoint HeadlessWC
-    $route = $request->get_route();
-
-    if (strpos($route, '/headless-wc/') === false) {
-        return;
-    }
-
-    // Sprawdź czy logowanie jest włączone (można dodać do ustawień)
-    if (get_option('headlesswc_enable_api_logging', 'no') !== 'yes') {
-        return;
-    }
-
-    // Loguj próbę dostępu
-    $log_data = array(
-        'timestamp' => current_time('mysql'),
-        'route' => $route,
-        'method' => $request->get_method(),
-        'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
-        'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
-        'origin' => $_SERVER['HTTP_ORIGIN'] ?? $_SERVER['HTTP_REFERER'] ?? 'unknown'
-    );
-
-    // Zapisz log (można rozszerzyć o zapis do bazy danych)
-    error_log('HeadlessWC API Access: ' . json_encode($log_data));
-}

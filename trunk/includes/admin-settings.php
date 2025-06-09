@@ -3,8 +3,17 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-// Tylko jeśli WooCommerce jest aktywny
-if (class_exists('WooCommerce')) {
+// Dodaj hook'i WooCommerce z późniejszym priorytetem aby WooCommerce był już załadowany
+add_action('init', 'headlesswc_init_admin_settings', 20);
+
+function headlesswc_init_admin_settings()
+{
+    // Sprawdź czy WooCommerce jest aktywny
+    if (!class_exists('WooCommerce')) {
+        return;
+    }
+
+    // Dodaj hook'i tylko gdy WooCommerce jest już załadowany
     add_filter('woocommerce_settings_tabs_array', 'headlesswc_add_settings_tab', 50);
     add_action('woocommerce_settings_tabs_headlesswc', 'headlesswc_settings_tab');
     add_action('woocommerce_update_options_headlesswc', 'headlesswc_update_settings');
@@ -95,15 +104,6 @@ function headlesswc_get_settings()
             'id'       => 'headlesswc_include_order_key',
             'default'  => 'yes',
             'desc_tip' => __('When enabled, all redirect URLs will include ?order=123&key=wc_order_xyz for secure order verification in your frontend.', 'headless-wc'),
-        ),
-
-        array(
-            'name'     => __('Enable API Access Logging', 'headless-wc'),
-            'type'     => 'checkbox',
-            'desc'     => __('Log all HeadlessWC API access attempts for security monitoring', 'headless-wc'),
-            'id'       => 'headlesswc_enable_api_logging',
-            'default'  => 'no',
-            'desc_tip' => __('When enabled, all API access attempts will be logged including IP address, user agent, and request details. Check your error log for entries.', 'headless-wc'),
         ),
 
         array(
