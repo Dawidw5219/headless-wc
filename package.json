@@ -2,7 +2,7 @@
   "name": "headless-wc",
   "license": "GPL-2.0-or-later",
   "scripts": {
-    "dev": "grunt dev:ftp",
+    "dev": "grunt dev:local",
     "dev:ftp": "grunt dev:ftp",
     "dev:local": "grunt dev:local",
     "build": "grunt build",
@@ -19,7 +19,7 @@
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-cssmin": "^5.0.0",
     "grunt-contrib-uglify": "^5.2.2",
-    "grunt-contrib-watch": "^1.1.0", 
+    "grunt-contrib-watch": "^1.1.0",
     "grunt-ftp-push": "^1.2.1",
     "grunt-replace": "^2.0.2",
     "grunt-sftp-deploy": "^0.2.5",
