@@ -57,7 +57,7 @@ When you update any product in WooCommerce, HeadlessWC can automatically notify 
 ### URL Format:
 
 ```
-GET https://yourapp.com/api/revalidate?slug=product-slug&id=123&action=revalidate&type=product
+GET https://yourapp.com/api/revalidate?slug=product-slug&id=123
 ```
 
 ### Error Monitoring:
