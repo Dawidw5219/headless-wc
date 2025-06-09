@@ -23,6 +23,7 @@ require_once HEADLESSWC_PATH . 'vendor/autoload.php';
 require_once HEADLESSWC_PATH . 'includes/check-plugin-requirements.php';
 require_once HEADLESSWC_PATH . 'includes/redirect_after_order.php';
 require_once HEADLESSWC_PATH . 'includes/admin-settings.php';
+require_once HEADLESSWC_PATH . 'includes/api-security.php';
 require_once HEADLESSWC_PATH . 'includes/api-routes.php';
 require_once HEADLESSWC_PATH . 'api/create-cart.php';
 require_once HEADLESSWC_PATH . 'api/create-order.php';

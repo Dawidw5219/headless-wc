@@ -5,15 +5,6 @@ if (! defined('ABSPATH')) {
 
 function headlesswc_handle_cart_request(WP_REST_Request $request)
 {
-    if (!headlesswc_is_domain_allowed()) {
-        return new WP_REST_Response(
-            array(
-                'success' => false,
-                'error' => 'Forbidden: Domain not whitelisted',
-            ), 403
-        );
-    }
-    
     $start_timer = microtime(true);
     try {
         $data = $request->get_json_params();

@@ -5,15 +5,6 @@ if (! defined('ABSPATH')) {
 
 function headlesswc_handle_order_details_request(WP_REST_Request $request)
 {
-    if (!headlesswc_is_domain_allowed()) {
-        return new WP_REST_Response(
-            array(
-                'success' => false,
-                'error' => 'Forbidden: Domain not whitelisted',
-            ), 403
-        );
-    }
-    
     try {
         $order_id = intval($request->get_param('order_id') ?? 0);
         $order_key = sanitize_text_field($request->get_param('key') ?? '');

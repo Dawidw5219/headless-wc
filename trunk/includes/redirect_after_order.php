@@ -21,17 +21,19 @@ function headlesswc_redirect_after_order()
 		}
 		$redirect_url = $order->get_meta('redirect_url');
 		if (! empty($redirect_url)) {
-			// Add order key and order ID as query parameters - fix URL encoding
-			$redirect_url = add_query_arg(array(
-				'order' => $order_id,
-				'key' => $order->get_order_key()
-			), $redirect_url);
+			// Add order key and order ID as query parameters - respect settings
+			if (headlesswc_is_include_order_key_enabled()) {
+				$redirect_url = add_query_arg(array(
+					'order' => $order_id,
+					'key' => $order->get_order_key()
+				), $redirect_url);
+			}
 			wp_redirect($redirect_url);
 			exit;
 		}
 	}
 
-	// Handle order-pay page - NEW PHP-based approach for COD
+	// Handle order-pay page - PHP-based approach for COD
 	if (is_wc_endpoint_url('order-pay')) {
 		$order_id = isset($GLOBALS['wp']->query_vars['order-pay']) ? intval($GLOBALS['wp']->query_vars['order-pay']) : false;
 		if (! $order_id) {
@@ -48,27 +50,31 @@ function headlesswc_redirect_after_order()
 		if (! empty($redirect_url)) {
 			// For already confirmed orders, redirect immediately
 			if (in_array($order->get_status(), array('processing', 'on-hold', 'completed'))) {
-				$redirect_url_with_params = add_query_arg(array(
-					'order' => $order_id,
-					'key' => $order->get_order_key()
-				), $redirect_url);
-				wp_redirect($redirect_url_with_params);
+				if (headlesswc_is_include_order_key_enabled()) {
+					$redirect_url = add_query_arg(array(
+						'order' => $order_id,
+						'key' => $order->get_order_key()
+					), $redirect_url);
+				}
+				wp_redirect($redirect_url);
 				exit;
 			}
 
-			// NEW: PHP-based COD handling - no JavaScript needed
-			if ($payment_method === 'cod' && $order->get_status() === 'pending') {
+			// PHP-based COD handling - respect auto-confirm setting
+			if ($payment_method === 'cod' && $order->get_status() === 'pending' && headlesswc_is_auto_confirm_cod_enabled()) {
 				// Automatically confirm COD order
 				$order->update_status('processing', __('COD order automatically confirmed for headless checkout.', 'headless-wc'));
 
-				// Add order key and order ID as query parameters
-				$redirect_url_with_params = add_query_arg(array(
-					'order' => $order_id,
-					'key' => $order->get_order_key()
-				), $redirect_url);
+				// Add order key and order ID as query parameters if enabled
+				if (headlesswc_is_include_order_key_enabled()) {
+					$redirect_url = add_query_arg(array(
+						'order' => $order_id,
+						'key' => $order->get_order_key()
+					), $redirect_url);
+				}
 
 				// Immediate redirect - no page content will be displayed
-				wp_redirect($redirect_url_with_params);
+				wp_redirect($redirect_url);
 				exit;
 			}
 		}
@@ -85,11 +91,14 @@ function headlesswc_handle_order_status_change($order_id, $old_status, $new_stat
 
 	// For non-COD orders that just got confirmed, set up redirect for next page load
 	if (!empty($redirect_url) && $payment_method !== 'cod' && $old_status === 'pending' && in_array($new_status, array('processing', 'on-hold', 'completed'))) {
-		// Add order key and order ID as query parameters
-		$redirect_url_with_params = add_query_arg(array(
-			'order' => $order_id,
-			'key' => $order->get_order_key()
-		), $redirect_url);
+		// Add order key and order ID as query parameters if enabled
+		$redirect_url_with_params = $redirect_url;
+		if (headlesswc_is_include_order_key_enabled()) {
+			$redirect_url_with_params = add_query_arg(array(
+				'order' => $order_id,
+				'key' => $order->get_order_key()
+			), $redirect_url);
+		}
 		// Store redirect flag for next page load
 		set_transient('headlesswc_redirect_' . $order_id, $redirect_url_with_params, 300); // 5 minutes expiry
 	}
@@ -123,7 +132,7 @@ function headlesswc_check_pending_redirect()
 	}
 }
 
-// NEW: Early redirect hook to catch COD orders before any page content is processed
+// Early redirect hook to catch COD orders before any page content is processed
 add_action('template_redirect', 'headlesswc_early_cod_redirect', 5);
 
 function headlesswc_early_cod_redirect()
@@ -150,22 +159,25 @@ function headlesswc_early_cod_redirect()
 	$redirect_url = $order->get_meta('redirect_url');
 	$payment_method = $order->get_payment_method();
 
-	// Early redirect for COD orders with redirect URL set
+	// Early redirect for COD orders with redirect URL set - respect settings
 	if (! empty($redirect_url) && $payment_method === 'cod') {
-		// Check if order needs to be confirmed
-		if ($order->get_status() === 'pending') {
+		// Check if order needs to be confirmed and auto-confirm is enabled
+		if ($order->get_status() === 'pending' && headlesswc_is_auto_confirm_cod_enabled()) {
 			// Automatically confirm COD order
 			$order->update_status('processing', __('COD order automatically confirmed for headless checkout.', 'headless-wc'));
 		}
 
 		// Always redirect if order is ready and has redirect URL
 		if (in_array($order->get_status(), array('processing', 'on-hold', 'completed'))) {
-			$redirect_url_with_params = add_query_arg(array(
-				'order' => $order_id,
-				'key' => $order->get_order_key()
-			), $redirect_url);
+			// Add order key and order ID as query parameters if enabled
+			if (headlesswc_is_include_order_key_enabled()) {
+				$redirect_url = add_query_arg(array(
+					'order' => $order_id,
+					'key' => $order->get_order_key()
+				), $redirect_url);
+			}
 
-			wp_redirect($redirect_url_with_params);
+			wp_redirect($redirect_url);
 			exit;
 		}
 	}
