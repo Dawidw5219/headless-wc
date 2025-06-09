@@ -30,6 +30,7 @@ add_action('admin_init', 'headlesswc_register_settings');
 function headlesswc_register_settings()
 {
     register_setting('headlesswc_settings', 'headlesswc_domain_whitelist');
+    register_setting('headlesswc_settings', 'headlesswc_cache_revalidation_url');
 
     add_settings_section(
         'headlesswc_security_section',
@@ -45,6 +46,21 @@ function headlesswc_register_settings()
         'headlesswc_settings',
         'headlesswc_security_section'
     );
+
+    add_settings_section(
+        'headlesswc_cache_section',
+        __('Cache & Performance Settings', 'headless-wc'),
+        'headlesswc_cache_section_callback',
+        'headlesswc_settings'
+    );
+
+    add_settings_field(
+        'headlesswc_cache_revalidation_url',
+        __('Cache Revalidation URL', 'headless-wc'),
+        'headlesswc_cache_revalidation_url_callback',
+        'headlesswc_settings',
+        'headlesswc_cache_section'
+    );
 }
 
 function headlesswc_security_section_callback()
@@ -52,11 +68,26 @@ function headlesswc_security_section_callback()
     echo '<p>' . __('Configure security settings for HeadlessWC API access.', 'headless-wc') . '</p>';
 }
 
+function headlesswc_cache_section_callback()
+{
+    echo '<p>' . __('Configure cache management and performance optimization for your headless frontend.', 'headless-wc') . '</p>';
+}
+
 function headlesswc_domain_whitelist_callback()
 {
     $value = get_option('headlesswc_domain_whitelist', '');
     echo '<textarea name="headlesswc_domain_whitelist" rows="5" cols="50" class="large-text">' . esc_textarea($value) . '</textarea>';
     echo '<p class="description">' . __('Enter allowed domains one per line (e.g., example.com). Leave empty to allow all domains.', 'headless-wc') . '</p>';
+}
+
+function headlesswc_cache_revalidation_url_callback()
+{
+    $value = get_option('headlesswc_cache_revalidation_url', '');
+    echo '<input type="url" name="headlesswc_cache_revalidation_url" value="' . esc_attr($value) . '" class="large-text" placeholder="https://yourapp.com/api/revalidate" />';
+    echo '<p class="description">' . __('Optional: URL endpoint for cache revalidation. When a product is updated, HeadlessWC will automatically call this URL with product details to trigger cache refresh in your frontend application.', 'headless-wc') . '</p>';
+    echo '<p class="description"><strong>' . __('How it works:', 'headless-wc') . '</strong> ' . __('After any product change, a GET request will be sent to your URL with query parameters: <code>?slug=product-slug&id=123</code>', 'headless-wc') . '</p>';
+    echo '<p class="description"><strong>' . __('Use case:', 'headless-wc') . '</strong> ' . __('Perfect for Next.js ISR (Incremental Static Regeneration), Gatsby, or any frontend that supports on-demand cache revalidation.', 'headless-wc') . '</p>';
+    echo '<p class="description"><strong>' . __('Leave empty to disable this feature.', 'headless-wc') . '</strong></p>';
 }
 
 function headlesswc_settings_page()

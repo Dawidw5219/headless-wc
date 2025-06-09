@@ -16,6 +16,13 @@ HeadlessWC transforms your eCommerce approach by providing custom eCommerce endp
 - **Domain whitelist control** - Restrict access to trusted frontend domains
 - **Future-proof security** - New endpoints automatically inherit protection
 
+### ✅ Cache Revalidation System
+
+- **Automatic cache invalidation** - Frontend automatically notified of product changes
+- **Perfect for Next.js ISR** - Works with Incremental Static Regeneration
+- **Asynchronous requests** - Non-blocking product updates
+- **Configurable endpoint** - Set your own revalidation URL
+
 ### ✅ Simple Administration
 
 - **WooCommerce submenu integration** - Native admin experience
@@ -30,7 +37,50 @@ Navigate to **WooCommerce → HeadlessWC** to configure:
 
 - **Domain Whitelist**: Restrict API access to specific domains (optional)
 
+### Cache & Performance Settings
+
+- **Cache Revalidation URL**: Automatic frontend cache invalidation on product updates
+
 _Note: COD auto-confirmation and order key inclusion are always enabled for optimal security and performance._
+
+## Cache Revalidation
+
+When you update any product in WooCommerce, HeadlessWC can automatically notify your frontend to refresh its cache.
+
+### How it works:
+
+1. Product gets updated in WooCommerce admin
+2. HeadlessWC sends a GET request to your configured URL
+3. Your frontend receives the request and revalidates the specific product
+
+### URL Format:
+
+```
+GET https://yourapp.com/api/revalidate?slug=product-slug&id=123&action=revalidate&type=product
+```
+
+### Perfect for:
+
+- **Next.js ISR** - Use with `revalidateTag()` or `revalidatePath()`
+- **Gatsby** - Trigger incremental builds
+- **Custom cache systems** - Redis, Memcached invalidation
+- **CDN purging** - CloudFlare, AWS CloudFront cache busting
+
+### Example Next.js API Route:
+
+```javascript
+// pages/api/revalidate.js
+export default async function handler(req, res) {
+  const { slug, id } = req.query;
+
+  try {
+    await res.revalidate(`/products/${slug}`);
+    return res.json({ revalidated: true, product: id });
+  } catch (err) {
+    return res.status(500).send("Error revalidating");
+  }
+}
+```
 
 ## API Endpoints
 
@@ -110,7 +160,8 @@ _Note: COD auto-confirmation and order key inclusion are always enabled for opti
 
 1. **Install the plugin** in your WordPress/WooCommerce site
 2. **Configure domain whitelist** in WooCommerce → HeadlessWC (optional)
-3. **Use API endpoints** in your headless frontend
+3. **Set cache revalidation URL** for automatic frontend updates (optional)
+4. **Use API endpoints** in your headless frontend
 
 _That's it! COD processing and order keys work automatically._
 
