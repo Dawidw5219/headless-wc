@@ -5,7 +5,7 @@
  * Text Domain: headless - wc
  * Domain Path: /languages
  * Description: Custom WC endpoints for headless checkout
- * Version: 1.2.7
+ * Version: 1.2.8
  * Author: Dawid Wiewiórski
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html

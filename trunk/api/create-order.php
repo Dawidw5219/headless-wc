@@ -62,7 +62,7 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
             }
         }
 
-        $order->add_meta_data('redirect_url', $data['redirectUrl'], true);
+        $order->add_meta_data('headlesswc_redirect_url', $data['redirectUrl'], true);
         $order->save();
 
         // Dodaj produkty do zamówienia (już zwalidowane)
