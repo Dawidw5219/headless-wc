@@ -243,14 +243,193 @@ function headlesswc_check_pending_redirect()
 				<script type="text/javascript">
 					window.location.href = <?php echo json_encode($redirect_url); ?>;
 				</script>
-<?php
+	<?php
 			}
 		}
 	}
 }
 
+// Hijack order-pay page for headless orders - immediate payment processing
+add_action('template_redirect', 'headlesswc_hijack_order_pay', 1);
 // Early redirect hook to catch COD orders before any page content is processed
 add_action('template_redirect', 'headlesswc_early_cod_redirect', 5);
+
+function headlesswc_hijack_order_pay()
+{
+	if (!function_exists('is_wc_endpoint_url') || !function_exists('wc_get_order')) {
+		return;
+	}
+
+	// Only handle order-pay pages
+	if (!is_wc_endpoint_url('order-pay')) {
+		return;
+	}
+
+	$order_id = isset($GLOBALS['wp']->query_vars['order-pay']) ? intval($GLOBALS['wp']->query_vars['order-pay']) : 0;
+	if ($order_id <= 0) {
+		return;
+	}
+
+	$order = wc_get_order($order_id);
+	if (!$order) {
+		return;
+	}
+
+	$redirect_url = $order->get_meta('redirect_url');
+	if (empty($redirect_url)) {
+		return; // Not a headless order
+	}
+
+	// For headless orders, bypass normal WooCommerce template completely
+	// and process payment immediately
+
+	// Automatically accept terms
+	update_post_meta($order_id, '_terms_accepted', 'yes');
+
+	// Get payment gateway
+	$payment_method = $order->get_payment_method();
+	$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+
+	if (!isset($available_gateways[$payment_method])) {
+		wp_die('Payment method not available');
+	}
+
+	$gateway = $available_gateways[$payment_method];
+
+	// Check if we can process directly or need form submission
+	if (isset($_POST['woocommerce_pay']) && isset($_POST['payment_method'])) {
+		// Already processing - let WooCommerce handle it normally
+		return;
+	}
+
+	// For fresh page loads, try direct processing first
+	try {
+		// Set up session and customer data
+		if (!WC()->session) {
+			WC()->session = new WC_Session_Handler();
+			WC()->session->init();
+		}
+
+		WC()->customer->set_billing_country($order->get_billing_country());
+		WC()->customer->set_billing_state($order->get_billing_state());
+		WC()->customer->set_billing_postcode($order->get_billing_postcode());
+
+		// Simulate form submission
+		$_POST['payment_method'] = $payment_method;
+		$_POST['terms'] = 'yes';
+		$_POST['woocommerce_pay'] = '1';
+		$_POST['woocommerce-pay-nonce'] = wp_create_nonce('woocommerce-pay');
+
+		// Try to process payment
+		$result = $gateway->process_payment($order_id);
+
+		if (isset($result['result']) && $result['result'] === 'success' && !empty($result['redirect'])) {
+			// Direct redirect to payment gateway
+			wp_redirect($result['redirect']);
+			exit;
+		}
+	} catch (Exception $e) {
+		// Log error but continue to fallback
+		error_log('HeadlessWC: Direct payment processing failed - ' . $e->getMessage());
+	}
+
+	// Fallback: show minimal auto-submit form
+	headlesswc_show_minimal_payment_page($order, $gateway);
+	exit;
+}
+
+function headlesswc_show_minimal_payment_page($order, $gateway, $error = '')
+{
+	// Minimal payment page for headless orders - no theme, just essentials
+	?>
+	<!DOCTYPE html>
+	<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Payment Processing</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				margin: 0;
+				padding: 20px;
+				background: #f5f5f5
+			}
+
+			.container {
+				max-width: 600px;
+				margin: 0 auto;
+				background: white;
+				padding: 30px;
+				border-radius: 8px
+			}
+
+			.error {
+				background: #ffebee;
+				color: #c62828;
+				padding: 15px;
+				border-radius: 4px;
+				margin-bottom: 20px
+			}
+
+			form {
+				margin: 20px 0
+			}
+
+			input,
+			button {
+				display: block;
+				width: 100%;
+				padding: 12px;
+				margin: 10px 0;
+				border: 1px solid #ddd;
+				border-radius: 4px
+			}
+
+			button {
+				background: #0073aa;
+				color: white;
+				cursor: pointer;
+				font-size: 16px
+			}
+
+			button:hover {
+				background: #005177
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<h2>Processing Payment</h2>
+			<?php if ($error): ?>
+				<div class="error"><?php echo esc_html($error); ?></div>
+			<?php endif; ?>
+
+			<form method="post" action="<?php echo esc_url($order->get_checkout_payment_url(true)); ?>">
+				<?php wp_nonce_field('woocommerce-pay', 'woocommerce-pay-nonce'); ?>
+				<input type="hidden" name="payment_method" value="<?php echo esc_attr($order->get_payment_method()); ?>">
+				<input type="hidden" name="terms" value="yes">
+				<input type="hidden" name="woocommerce_pay" value="1">
+
+				<p><strong>Order #<?php echo $order->get_order_number(); ?></strong></p>
+				<p>Total: <?php echo $order->get_formatted_order_total(); ?></p>
+				<p>Payment Method: <?php echo $gateway->title; ?></p>
+
+				<button type="submit" id="pay-btn">Pay Now</button>
+			</form>
+		</div>
+
+		<script>
+			// Instant auto-submit
+			document.getElementById('pay-btn').click();
+		</script>
+	</body>
+
+	</html>
+<?php
+}
 
 function headlesswc_early_cod_redirect()
 {
