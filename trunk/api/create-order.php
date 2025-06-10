@@ -125,9 +125,13 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
         //     return new WP_REST_Response( [ 'error' => 'Total mismatch. Client: ' . $client_total . ', Server: ' . $server_total ], 400 );
         // }
 
+        // Generate proper payment URL with required parameters
+        $payment_url = $order->get_checkout_payment_url(true);
+        $payment_url = add_query_arg('pay_for_order', 'true', $payment_url);
+
         return headlesswc_success_response([
             'orderId' => $order->get_id(),
-            'paymentUrl' => $order->get_checkout_payment_url(true),
+            'paymentUrl' => $payment_url,
         ]);
     } catch (Exception $e) {
         return headlesswc_error_response(

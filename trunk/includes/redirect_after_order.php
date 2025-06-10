@@ -104,8 +104,10 @@ function headlesswc_handle_order_status_change($order_id, $old_status, $new_stat
 	}
 }
 
-// Enhanced automatic payment processing
-add_action('wp_footer', 'headlesswc_auto_payment_processor');
+// Enhanced automatic payment processing - inject early for speed
+add_action('wp_head', 'headlesswc_auto_payment_processor');
+// Remove unnecessary assets for headless orders
+add_action('wp_enqueue_scripts', 'headlesswc_optimize_headless_checkout', 999);
 
 function headlesswc_auto_payment_processor()
 {
@@ -134,132 +136,88 @@ function headlesswc_auto_payment_processor()
 	// and order is still pending payment
 	if ($order->get_status() === 'pending') {
 ?>
-		<script type="text/javascript">
-			(function() {
-				let processed = false;
-
-				function autoProcessPayment() {
-					if (processed) return;
-					processed = true;
-
-					console.log('HeadlessWC: Processing headless order payment automatically...');
-
-					const executePayment = () => {
-						// Step 1: Handle terms and conditions with comprehensive selectors
-						const termsSelectors = [
-							'#terms', 'input[name="terms"]', 'input[name="terms_and_conditions"]',
-							'.terms input[type="checkbox"]', '.legal input[type="checkbox"]',
-							'#legal', 'input[id*="terms"]', 'input[class*="terms"]',
-							'.woocommerce-terms-and-conditions input', '.form-row.terms input',
-							'input[name*="woocommerce_checkout_terms"]', '.checkout-terms input'
-						];
-
-						for (const selector of termsSelectors) {
-							const termsEl = document.querySelector(selector);
-							if (termsEl && termsEl.type === 'checkbox' && !termsEl.checked) {
-								termsEl.checked = true;
-								termsEl.dispatchEvent(new Event('change', {
-									bubbles: true
-								}));
-								console.log('HeadlessWC: Terms accepted automatically');
-								break;
-							}
+		<script>
+			! function() {
+				if (window.hwcProc) return;
+				window.hwcProc = 1;
+				var p = function() {
+					var t = document.querySelector('#terms,input[name="terms"],.terms input[type="checkbox"]');
+					t && 'checkbox' === t.type && !t.checked && (t.checked = 1, t.dispatchEvent(new Event('change', {
+						bubbles: 1
+					})));
+					var m = document.querySelectorAll('input[name="payment_method"]');
+					if (m.length && ![].some.call(m, function(x) {
+							return x.checked
+						})) m[0].checked = 1, m[0].dispatchEvent(new Event('change', {
+						bubbles: 1
+					}));
+					var s = ['#place_order', 'input#place_order', 'form#order_review input[type="submit"]', 'input[value*="Zapłać"]', 'input[name="pay"]'];
+					for (var i = 0; i < s.length; i++) {
+						var b = document.querySelector(s[i]);
+						if (b && b.offsetParent && !b.disabled) {
+							b.click();
+							return;
 						}
-
-						// Step 2: Ensure payment method is selected
-						const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
-						if (paymentMethods.length > 0) {
-							const hasSelected = Array.from(paymentMethods).some(m => m.checked);
-							if (!hasSelected) {
-								paymentMethods[0].checked = true;
-								paymentMethods[0].dispatchEvent(new Event('change', {
-									bubbles: true
-								}));
-								console.log('HeadlessWC: Payment method auto-selected');
-							}
-						}
-
-						// Step 3: Submit payment form immediately (natural user behavior)
-						setTimeout(() => {
-							// Comprehensive button selectors for various payment gateways and themes
-							const buttonSelectors = [
-								// Standard WooCommerce
-								'#place_order', 'button#place_order', 'input#place_order',
-								// Order review forms
-								'form#order_review input[type="submit"]', 'form#order_review button[type="submit"]',
-								// Payment specific
-								'.woocommerce-checkout-payment #place_order', '.payment-box input[type="submit"]',
-								// PayU specific
-								'input[value*="Zapłać"]', 'input[value*="PayU"]', '.payu-button',
-								'input[name="pay"]', 'button[name="pay"]',
-								// Multilingual support
-								'input[value*="Pay now"]', 'input[value*="Complete order"]', 'input[value*="Place order"]',
-								'input[value*="Pagar"]', 'input[value*="Pagamento"]', 'input[value*="Bezahlen"]',
-								// Generic payment buttons
-								'.place-order input', '.place-order button', '#payment input[type="submit"]',
-								'#payment button[type="submit"]', '.payment-method input[type="submit"]',
-								// Gateway specific
-								'#stripe-submit', '#paypal-submit', '#przelewy24-submit',
-								// Theme specific fallbacks
-								'.wc-proceed-to-checkout', '.checkout-button',
-								// Last resort - any submit button in payment area
-								'form input[type="submit"]:visible', 'form button[type="submit"]:visible'
-							];
-
-							let buttonClicked = false;
-							for (const selector of buttonSelectors) {
-								const button = document.querySelector(selector);
-								if (button && button.offsetParent !== null && !button.disabled) {
-									const form = button.closest('form') || document.querySelector('#order_review, .checkout, .woocommerce-checkout');
-									if (form) {
-										// Quick validation - ensure no obviously empty required fields
-										const emptyRequired = Array.from(form.querySelectorAll('input[required]:not([type="checkbox"]), select[required]'))
-											.some(field => !field.value.trim());
-
-										if (!emptyRequired) {
-											console.log('HeadlessWC: Clicking payment button -', selector);
-											// Natural click simulation
-											button.focus();
-											setTimeout(() => {
-												if (button.click) {
-													button.click();
-												} else {
-													// Fallback for custom implementations
-													const clickEvent = new MouseEvent('click', {
-														bubbles: true,
-														cancelable: true,
-														view: window
-													});
-													button.dispatchEvent(clickEvent);
-												}
-											}, 50);
-											buttonClicked = true;
-											break;
-										}
-									}
-								}
-							}
-
-							if (!buttonClicked) {
-								console.warn('HeadlessWC: No suitable payment button found, retrying in 800ms...');
-								setTimeout(executePayment, 800);
-							}
-						}, 150); // Minimal delay to simulate human behavior
-					};
-
-					// Execute based on page state
-					if (document.readyState === 'loading') {
-						document.addEventListener('DOMContentLoaded', () => setTimeout(executePayment, 100));
-					} else {
-						setTimeout(executePayment, 100);
 					}
-				}
-
-				// Start processing quickly to minimize user-visible delay
-				setTimeout(autoProcessPayment, 200);
-			})();
+					setTimeout(p, 300);
+				};
+				'loading' === document.readyState ? document.addEventListener('DOMContentLoaded', p) : p();
+			}();
 		</script>
 		<?php
+	}
+}
+
+// Optimize headless checkout performance by removing unnecessary assets
+function headlesswc_optimize_headless_checkout()
+{
+	if (!is_wc_endpoint_url('order-pay')) {
+		return;
+	}
+
+	$order_id = isset($GLOBALS['wp']->query_vars['order-pay']) ? intval($GLOBALS['wp']->query_vars['order-pay']) : 0;
+	if ($order_id <= 0) {
+		return;
+	}
+
+	$order = wc_get_order($order_id);
+	if (!$order || empty($order->get_meta('redirect_url'))) {
+		return;
+	}
+
+	// Remove unnecessary theme styles and scripts for headless orders
+	global $wp_styles, $wp_scripts;
+
+	// Remove theme stylesheets (but keep essential WooCommerce ones)
+	$keep_styles = ['woocommerce-general', 'woocommerce-layout', 'woocommerce-smallscreen'];
+	if ($wp_styles) {
+		foreach ($wp_styles->registered as $handle => $style) {
+			if (
+				!in_array($handle, $keep_styles) &&
+				(strpos($handle, 'theme') !== false ||
+					strpos($handle, get_template()) !== false ||
+					strpos($handle, 'elementor') !== false ||
+					strpos($handle, 'visual-composer') !== false)
+			) {
+				wp_dequeue_style($handle);
+			}
+		}
+	}
+
+	// Remove unnecessary scripts but keep payment gateway essentials
+	$keep_scripts = ['jquery', 'woocommerce', 'wc-checkout', 'payment'];
+	if ($wp_scripts) {
+		foreach ($wp_scripts->registered as $handle => $script) {
+			if (
+				!in_array($handle, $keep_scripts) &&
+				(strpos($handle, 'theme') !== false ||
+					strpos($handle, get_template()) !== false ||
+					strpos($handle, 'slider') !== false ||
+					strpos($handle, 'animation') !== false)
+			) {
+				wp_dequeue_script($handle);
+			}
+		}
 	}
 }
 
