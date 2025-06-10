@@ -13,11 +13,74 @@ add_action('save_post', 'headlesswc_handle_product_update', 10, 3);
 add_action('woocommerce_update_product', 'headlesswc_handle_woocommerce_product_update', 10, 1);
 add_action('woocommerce_new_product', 'headlesswc_handle_woocommerce_product_update', 10, 1);
 
+// Dodatkowe hook'i dla obsługi zmian meta danych (w tym cen)
+add_action('updated_postmeta', 'headlesswc_handle_product_meta_update', 10, 4);
+add_action('added_postmeta', 'headlesswc_handle_product_meta_update', 10, 4);
+
+// Hook do obsługi AJAX - ważne dla wielokrotnych aktualizacji na tej samej stronie
+add_action('wp_ajax_save-post', 'headlesswc_handle_ajax_product_save', 5);
+
 // Hook do wyświetlania alertów o błędach rewalidacji
 add_action('admin_notices', 'headlesswc_show_cache_revalidation_errors');
 
 // Hook do czyszczenia błędów
 add_action('wp_ajax_headlesswc_dismiss_cache_error', 'headlesswc_dismiss_cache_error');
+
+/**
+ * Obsługa AJAX zapisywania produktów
+ */
+function headlesswc_handle_ajax_product_save()
+{
+    // Sprawdź czy to request dla produktu
+    if (isset($_POST['post_type']) && $_POST['post_type'] === 'product' && isset($_POST['post_ID'])) {
+        $product_id = intval($_POST['post_ID']);
+
+        // Opóźnij wywołanie rewalidacji aby meta dane zostały zapisane
+        add_action('shutdown', function () use ($product_id) {
+            headlesswc_trigger_cache_revalidation_with_delay($product_id);
+        });
+    }
+}
+
+/**
+ * Obsługa zmian meta danych produktów (w tym cen)
+ */
+function headlesswc_handle_product_meta_update($meta_id, $product_id, $meta_key, $meta_value)
+{
+    // Sprawdź czy to meta dane związane z produktem i cenami/ważnymi polami
+    $important_meta_keys = [
+        '_regular_price',
+        '_sale_price',
+        '_price',
+        '_stock',
+        '_stock_status',
+        '_manage_stock',
+        '_backorders',
+        '_sold_individually',
+        '_virtual',
+        '_downloadable',
+        '_sku',
+        '_weight',
+        '_length',
+        '_width',
+        '_height',
+        '_product_attributes',
+        '_visibility',
+        '_featured'
+    ];
+
+    if (!in_array($meta_key, $important_meta_keys)) {
+        return;
+    }
+
+    // Sprawdź czy to jest produkt
+    if (get_post_type($product_id) !== 'product') {
+        return;
+    }
+
+    // Wyzwól rewalidację z opóźnieniem (debouncing)
+    headlesswc_trigger_cache_revalidation_with_delay($product_id);
+}
 
 /**
  * Obsługa aktualizacji produktu przez save_post hook
@@ -34,8 +97,8 @@ function headlesswc_handle_product_update($post_id, $post, $update)
         return;
     }
 
-    // Wywołaj rewalidację cache
-    headlesswc_trigger_cache_revalidation($post_id);
+    // Wywołaj rewalidację cache z opóźnieniem
+    headlesswc_trigger_cache_revalidation_with_delay($post_id);
 }
 
 /**
@@ -43,6 +106,40 @@ function headlesswc_handle_product_update($post_id, $post, $update)
  */
 function headlesswc_handle_woocommerce_product_update($product_id)
 {
+    headlesswc_trigger_cache_revalidation_with_delay($product_id);
+}
+
+/**
+ * Wyzwól rewalidację cache z mechanizmem debouncing
+ */
+function headlesswc_trigger_cache_revalidation_with_delay($product_id)
+{
+    // Mechanizm debouncing - zapobiega zbyt częstym wywołaniom rewalidacji
+    $transient_key = 'headlesswc_revalidation_pending_' . $product_id;
+
+    // Jeśli rewalidacja jest już zaplanowana dla tego produktu, anuluj poprzednią
+    if (get_transient($transient_key)) {
+        wp_clear_scheduled_hook('headlesswc_delayed_cache_revalidation', array($product_id));
+    }
+
+    // Ustaw transient na 3 sekundy
+    set_transient($transient_key, true, 3);
+
+    // Zaplanuj rewalidację za 2 sekundy (pozwala na zakończenie wszystkich operacji)
+    wp_schedule_single_event(time() + 2, 'headlesswc_delayed_cache_revalidation', array($product_id));
+}
+
+/**
+ * Hook do wykonania opóźnionej rewalidacji
+ */
+add_action('headlesswc_delayed_cache_revalidation', 'headlesswc_execute_delayed_revalidation', 10, 1);
+
+function headlesswc_execute_delayed_revalidation($product_id)
+{
+    // Wyczyść transient
+    delete_transient('headlesswc_revalidation_pending_' . $product_id);
+
+    // Wykonaj rzeczywistą rewalidację
     headlesswc_trigger_cache_revalidation($product_id);
 }
 
@@ -69,7 +166,8 @@ function headlesswc_trigger_cache_revalidation($product_id)
     $params = array(
         'slug' => $product->get_slug(),
         'id' => $product_id,
-        'type' => 'product'
+        'type' => 'product',
+        'timestamp' => time() // Dodaj timestamp aby uniknąć cachowania
     );
 
     // Dodaj parametry do URL
