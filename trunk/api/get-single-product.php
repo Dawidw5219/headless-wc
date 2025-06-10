@@ -44,8 +44,7 @@ function headlesswc_handle_product_request(WP_REST_Request $request)
     $product_data = $product->get_data();
     ksort($product_data);
 
-    return headlesswc_success_response([
+    return headlesswc_success_response($product_data + [
         'executionTime' => microtime(true) - $start_timer,
-        'data' => $product_data,
     ]);
 }

@@ -78,11 +78,13 @@ function headlesswc_domain_whitelist_callback()
     $value = get_option('headlesswc_domain_whitelist', '');
     echo '<textarea name="headlesswc_domain_whitelist" rows="5" cols="50" class="large-text">' . esc_textarea($value) . '</textarea>';
     echo '<p class="description">' . __('Enter allowed domains or IP addresses one per line (e.g., example.com or 83.25.131.249). Always specify the exact domains/IPs that will access this API for security. Leaving this field empty allows ALL domains - use only for testing!', 'headless-wc') . '</p>';
+
     echo '<p class="description"><strong>' . __('Supported formats:', 'headless-wc') . '</strong></p>';
     echo '<ul style="margin-left: 20px;">';
     echo '<li><code>example.com</code> - ' . __('allows subdomains like test.example.com', 'headless-wc') . '</li>';
     echo '<li><code>sub.example.com</code> - ' . __('allows only exact subdomain', 'headless-wc') . '</li>';
-    echo '<li><code>192.168.1.100</code> - ' . __('allows specific IP address', 'headless-wc') . '</li>';
+    echo '<li><code>192.168.1.100</code> - ' . __('allows specific IPv4 address', 'headless-wc') . '</li>';
+    echo '<li><code>::1</code> - ' . __('allows specific IPv6 address', 'headless-wc') . '</li>';
     echo '</ul>';
 }
 
@@ -124,16 +126,24 @@ function headlesswc_is_domain_allowed()
         return true;
     }
 
-    // Get request domain
+    // Get request domain and IP
     $request_origin = $_SERVER['HTTP_ORIGIN'] ?? $_SERVER['HTTP_REFERER'] ?? '';
-
-    // If no origin/referer header and whitelist is set, deny access
-    if (empty($request_origin)) {
-        return false;
+    $request_domain = '';
+    if (!empty($request_origin)) {
+        $request_domain = parse_url($request_origin, PHP_URL_HOST);
     }
 
-    $request_domain = parse_url($request_origin, PHP_URL_HOST);
-    if (!$request_domain) {
+    // Get client IP address
+    $client_ip = headlesswc_get_client_ip();
+
+    // If no origin/referer header and no IP, deny access
+    if (empty($request_domain) && empty($client_ip)) {
+        headlesswc_log_access_denied(
+            'No domain or IP information available',
+            $client_ip,
+            $request_domain,
+            $_SERVER['REQUEST_URI'] ?? ''
+        );
         return false;
     }
 
@@ -144,28 +154,65 @@ function headlesswc_is_domain_allowed()
         return true;
     }
 
-    // Process whitelist domains
-    $allowed_domains = array_filter(array_map('trim', explode("\n", $whitelist)));
+    // Always allow localhost requests (development)
+    if (headlesswc_is_localhost_request($request_domain, $client_ip)) {
+        return true;
+    }
 
-    // Check if request domain matches any allowed domain
-    foreach ($allowed_domains as $domain) {
-        $domain = trim($domain);
-        if (empty($domain)) {
+    // Check whitelist entries (domains and IPs)
+    $allowed_entries = array_filter(array_map('trim', explode("\n", $whitelist)));
+
+    foreach ($allowed_entries as $entry) {
+        $entry = trim($entry);
+        if (empty($entry)) {
             continue;
         }
 
-        // Exact match
-        if ($request_domain === $domain) {
-            return true;
-        }
-
-        // If whitelist domain has no subdomain (only 2 parts: domain.com), allow subdomains
-        $domain_parts = explode('.', $domain);
-        if (count($domain_parts) <= 2) {
-            if (substr($request_domain, - (strlen($domain) + 1)) === '.' . $domain) {
+        // Check if entry is an IP address or localhost variant
+        if (filter_var($entry, FILTER_VALIDATE_IP) || in_array($entry, ['localhost'])) {
+            // It's an IP or localhost - check match
+            if ($client_ip === $entry) {
                 return true;
             }
+
+            // Special handling for localhost variants
+            if ($entry === 'localhost' && headlesswc_is_localhost_request($request_domain, $client_ip)) {
+                return true;
+            }
+
+            // IPv4/IPv6 localhost cross-compatibility
+            if (($entry === '127.0.0.1' && $client_ip === '::1') ||
+                ($entry === '::1' && $client_ip === '127.0.0.1')
+            ) {
+                return true;
+            }
+        } else {
+            // It's a domain - use existing domain logic
+            if (!empty($request_domain)) {
+                // Exact match
+                if ($request_domain === $entry) {
+                    return true;
+                }
+
+                // If whitelist domain has no subdomain (only 2 parts: domain.com), allow subdomains
+                $domain_parts = explode('.', $entry);
+                if (count($domain_parts) <= 2) {
+                    if (substr($request_domain, - (strlen($entry) + 1)) === '.' . $entry) {
+                        return true;
+                    }
+                }
+            }
         }
+    }
+
+    // Loguj nieudaną próbę dostępu (ale nie localhost)
+    if (!headlesswc_is_localhost_request($request_domain, $client_ip)) {
+        headlesswc_log_access_denied(
+            'Domain/IP not in whitelist',
+            $client_ip,
+            $request_domain,
+            $_SERVER['REQUEST_URI'] ?? ''
+        );
     }
 
     return false;
@@ -185,4 +232,65 @@ function headlesswc_is_auto_confirm_cod_enabled()
 function headlesswc_is_include_order_key_enabled()
 {
     return true; // Zawsze włączone
+}
+
+/**
+ * Pobierz IP klienta z różnych nagłówków
+ */
+function headlesswc_get_client_ip()
+{
+    // Lista nagłówków do sprawdzenia (w kolejności priorytetów)
+    $ip_headers = [
+        'HTTP_X_REAL_IP',
+        'HTTP_X_FORWARDED_FOR',
+        'HTTP_CLIENT_IP',
+        'REMOTE_ADDR'
+    ];
+
+    foreach ($ip_headers as $header) {
+        if (!empty($_SERVER[$header])) {
+            $ips = explode(',', $_SERVER[$header]);
+            $ip = trim($ips[0]);
+
+            // Sprawdź czy to poprawny IP (publiczny lub prywatny)
+            if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                return $ip;
+            }
+        }
+    }
+
+    return '';
+}
+
+/**
+ * Sprawdź czy request pochodzi z localhost
+ */
+function headlesswc_is_localhost_request($request_domain, $client_ip)
+{
+    // Lista wszystkich wariantów localhost
+    $localhost_domains = ['localhost', '127.0.0.1', '::1'];
+    $localhost_ips = ['127.0.0.1', '::1', '0.0.0.0'];
+
+    // Sprawdź domenę
+    if (!empty($request_domain) && in_array($request_domain, $localhost_domains)) {
+        return true;
+    }
+
+    // Sprawdź IP
+    if (!empty($client_ip)) {
+        // Sprawdź czy to localhost IP
+        if (in_array($client_ip, $localhost_ips)) {
+            return true;
+        }
+
+        // Sprawdź czy to lokalny zakres IP (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+        if (
+            filter_var($client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE) &&
+            !filter_var($client_ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE)
+        ) {
+            return true;
+        }
+    }
+
+    return false;
 }

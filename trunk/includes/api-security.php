@@ -31,6 +31,7 @@ function headlesswc_check_api_permissions($result, $server, $request)
 
     // To nasz endpoint - sprawdź uprawnienia domenowe
     if (!headlesswc_is_domain_allowed()) {
+        // Logowanie jest już obsługiwane w funkcji headlesswc_is_domain_allowed()
         return headlesswc_error_response(
             'Dostęp zabroniony: Domena nie jest na białej liście',
             HeadlessWC_Error_Codes::DOMAIN_NOT_ALLOWED,
