@@ -13,35 +13,17 @@ function headlesswc_handle_cart_request(WP_REST_Request $request)
         $cart->empty_cart();
         $discount_total = 0;
 
-        foreach ($data['cart'] as $product) {
-            $product_id = 0;
-            $quantity = isset($product['quantity']) ? intval($product['quantity']) : 1;
-            $variation_id = isset($product['variation_id']) ? intval($product['variation_id']) : 0;
+        // Waliduj produkty używając wspólnej funkcji
+        $valid_products = headlesswc_validate_cart_products($data['cart']);
+
+        // Dodaj tylko poprawne produkty do koszyka
+        foreach ($valid_products as $product) {
+            $product_id = $product['id'];
+            $quantity = $product['quantity'];
+            $variation_id = isset($product['variation_id']) ? $product['variation_id'] : 0;
             $variation = isset($product['variation']) ? $product['variation'] : [];
 
-            // Sprawdzamy czy produkt został zdefiniowany przez id
-            if (isset($product['id']) && ! empty($product['id'])) {
-                $product_id = intval($product['id']);
-            }
-            // Jeśli nie ma id, próbujemy znaleźć produkt po slug
-            elseif (isset($product['slug']) && ! empty($product['slug'])) {
-                $query_args = array(
-                    'post_type' => 'product',
-                    'name' => sanitize_title($product['slug']),
-                    'posts_per_page' => 1,
-                    'post_status' => 'publish',
-                    'fields' => 'ids'
-                );
-                $products = get_posts($query_args);
-                if (! empty($products)) {
-                    $product_id = $products[0];
-                }
-            }
-
-            if (! $product_id || $quantity < 1) {
-                continue;
-            }
-            if ($variation_id && $product_id) {
+            if ($variation_id > 0) {
                 $cart->add_to_cart($product_id, $quantity, $variation_id, $variation);
             } else {
                 $cart->add_to_cart($product_id, $quantity);
@@ -115,8 +97,7 @@ function headlesswc_handle_cart_request(WP_REST_Request $request)
             ];
         }
 
-        $response_data = [
-            'success' => true,
+        return headlesswc_success_response([
             'products' => $cart_items,
             'subtotal' => floatval($cart->get_subtotal()),
             'total' => floatval($cart->get_total('edit')),
@@ -128,10 +109,12 @@ function headlesswc_handle_cart_request(WP_REST_Request $request)
             'shippingMethods' => $shipping_methods,
             'paymentMethods' => $payment_methods,
             'executionTime' => microtime(true) - $start_timer,
-        ];
-
-        return new WP_REST_Response($response_data, 200);
+        ]);
     } catch (Exception $e) {
-        return new WP_REST_Response(array('error' => 'Unexpected error'), 500);
+        return headlesswc_error_response(
+            'Wystąpił nieoczekiwany błąd',
+            HeadlessWC_Error_Codes::UNEXPECTED_ERROR,
+            500
+        );
     }
 }

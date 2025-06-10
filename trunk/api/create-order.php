@@ -7,6 +7,32 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
 {
     try {
         $data = $request->get_json_params();
+
+        // Sprawdź koszyk PRZED utworzeniem zamówienia
+        if (empty($data['cart']) || !is_array($data['cart'])) {
+            return headlesswc_error_response(
+                'Koszyk jest pusty lub nieprawidłowy',
+                HeadlessWC_Error_Codes::CART_EMPTY
+            );
+        }
+
+        // Waliduj produkty w koszyku PRZED utworzeniem zamówienia (pomijaj niepoprawne)
+        $valid_products = headlesswc_validate_cart_products($data['cart']);
+        if (empty($valid_products)) {
+            return headlesswc_error_response(
+                'Nie znaleziono prawidłowych produktów w koszyku. Produkty mogą nie istnieć lub mieć nieprawidłowe ilości.',
+                HeadlessWC_Error_Codes::NO_VALID_PRODUCTS
+            );
+        }
+
+        if (empty($data['redirectUrl'])) {
+            return headlesswc_error_response(
+                'Adres przekierowania jest wymagany do przetwarzania płatności',
+                HeadlessWC_Error_Codes::REDIRECT_URL_REQUIRED
+            );
+        }
+
+        // Teraz utwórz zamówienie (wszystkie walidacje przeszły)
         $order = wc_create_order();
         $order->update_status('pending');
         update_post_meta($order->get_id(), '_terms_accepted', 'yes');
@@ -36,16 +62,11 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
             }
         }
 
-        if (empty($data['redirectUrl'])) {
-            return new WP_REST_Response(['error' => 'No valid redirect URL (client will be redirected after making payment)'], 400);
-        } else {
-            $order->add_meta_data('redirect_url', $data['redirectUrl'], true);
-            $order->save();
-        }
+        $order->add_meta_data('redirect_url', $data['redirectUrl'], true);
+        $order->save();
 
-        if (! headlesswc_apply_cart_products($data['cart'], $order)) {
-            return new WP_REST_Response(['error' => 'No valid products in order'], 400);
-        }
+        // Dodaj produkty do zamówienia (już zwalidowane)
+        headlesswc_apply_cart_products($valid_products, $order);
 
         $order->set_address(headlesswc_map_customer_data($data), 'billing');
         $order->set_address(! empty($data['useDifferentShipping']) ? headlesswc_map_customer_data($data, true) : headlesswc_map_customer_data($data), 'shipping');
@@ -54,15 +75,42 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
         $is_virtual_order = headlesswc_is_virtual_order($order);
 
         // Zastosuj metodę wysyłki tylko jeśli zamówienie nie jest całkowicie wirtualne
-        if (! $is_virtual_order && ! headlesswc_apply_shipping_method($data['shippingMethodId'], $order)) {
-            return new WP_REST_Response(['error' => 'Invalid or non-existent shipping method'], 400);
+        if (!$is_virtual_order) {
+            $shipping_method_id = $data['shippingMethodId'] ?? '';
+            if (!empty($shipping_method_id)) {
+                if (!headlesswc_apply_shipping_method($shipping_method_id, $order)) {
+                    return headlesswc_error_response(
+                        'Nieprawidłowa metoda wysyłki: ' . $shipping_method_id,
+                        HeadlessWC_Error_Codes::INVALID_SHIPPING_METHOD
+                    );
+                }
+            }
+            // Jeśli shipping_method_id jest puste dla produktów fizycznych, to jest OK - może być darmowa dostawa
         }
 
         headlesswc_apply_cupon($data['couponCode'], $order);
 
+        // Payment method - jeśli puste, użyj domyślnego
         $payment_method = sanitize_text_field($data['paymentMethodId'] ?? '');
-        if (! $payment_method || ! array_key_exists($payment_method, WC()->payment_gateways->payment_gateways())) {
-            return new WP_REST_Response(['error' => 'Invalid payment method'], 400);
+        if (empty($payment_method)) {
+            // Pobierz domyślną metodę płatności
+            $available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+            if (!empty($available_gateways)) {
+                $payment_method = array_key_first($available_gateways);
+            } else {
+                return headlesswc_error_response(
+                    'Brak dostępnych metod płatności',
+                    HeadlessWC_Error_Codes::NO_PAYMENT_METHODS
+                );
+            }
+        } else {
+            // Sprawdź czy podana metoda płatności istnieje
+            if (!array_key_exists($payment_method, WC()->payment_gateways->payment_gateways())) {
+                return headlesswc_error_response(
+                    'Nieprawidłowa metoda płatności: ' . $payment_method,
+                    HeadlessWC_Error_Codes::INVALID_PAYMENT_METHOD
+                );
+            }
         }
 
         $order->set_payment_method($payment_method);
@@ -77,15 +125,16 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
         //     return new WP_REST_Response( [ 'error' => 'Total mismatch. Client: ' . $client_total . ', Server: ' . $server_total ], 400 );
         // }
 
-        $response_data = [
-            'success' => true,
+        return headlesswc_success_response([
             'orderId' => $order->get_id(),
             'paymentUrl' => $order->get_checkout_payment_url(true),
-        ];
-
-        return new WP_REST_Response($response_data, 200);
+        ]);
     } catch (Exception $e) {
-        return new WP_REST_Response(['error' => 'An error occurred: ' . $e->getMessage()], 500);
+        return headlesswc_error_response(
+            'Wystąpił nieoczekiwany błąd: ' . $e->getMessage(),
+            HeadlessWC_Error_Codes::UNEXPECTED_ERROR,
+            500
+        );
     }
 }
 
@@ -141,21 +190,20 @@ function headlesswc_apply_cupon($couponCode, $order)
     return true;
 }
 
-function headlesswc_apply_cart_products($cart, $order)
+function headlesswc_apply_cart_products($valid_products, $order)
 {
-    if (empty($cart) || ! is_array($cart)) {
-        return false;
-    }
-    foreach ($cart as $product) {
-        $product_id = isset($product['id']) ? intval($product['id']) : 0;
-        $quantity = isset($product['quantity']) ? intval($product['quantity']) : 1;
-        if ($product_id <= 0 || $quantity <= 0) {
-            continue;
+    // Produkty są już zwalidowane, więc po prostu je dodaj
+    foreach ($valid_products as $product) {
+        $product_id = $product['id'];
+        $quantity = $product['quantity'];
+        $variation_id = isset($product['variation_id']) ? $product['variation_id'] : 0;
+        $variation = isset($product['variation']) ? $product['variation'] : [];
+
+        if ($variation_id > 0) {
+            $order->add_product(wc_get_product($variation_id), $quantity, $variation);
+        } else {
+            $order->add_product(wc_get_product($product_id), $quantity);
         }
-        $order->add_product(wc_get_product($product_id), $quantity);
-    }
-    if (count($order->get_items()) === 0) {
-        return false;
     }
     return true;
 }

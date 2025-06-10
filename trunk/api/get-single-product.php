@@ -8,12 +8,9 @@ function headlesswc_handle_product_request(WP_REST_Request $request)
     $start_timer = microtime(true);
     $identifier = $request->get_param('slug');
     if (empty($identifier)) {
-        return new WP_REST_Response(
-            array(
-                'success' => false,
-                'message' => 'Invalid product identifier',
-            ),
-            400
+        return headlesswc_error_response(
+            'Nieprawidłowy identyfikator produktu',
+            HeadlessWC_Error_Codes::INVALID_PRODUCTS
         );
     }
 
@@ -36,11 +33,9 @@ function headlesswc_handle_product_request(WP_REST_Request $request)
     $query = new WP_Query($args);
     $products = $query->posts;
     if (empty($products)) {
-        return new WP_REST_Response(
-            array(
-                'success' => false,
-                'message' => 'Product not found',
-            ),
+        return headlesswc_error_response(
+            'Produkt nie został znaleziony',
+            HeadlessWC_Error_Codes::PRODUCT_NOT_FOUND,
             404
         );
     }
@@ -49,12 +44,8 @@ function headlesswc_handle_product_request(WP_REST_Request $request)
     $product_data = $product->get_data();
     ksort($product_data);
 
-    return new WP_REST_Response(
-        array(
-            'success' => true,
-            'executionTime' => microtime(true) - $start_timer,
-            'data' => $product_data,
-        ),
-        200
-    );
+    return headlesswc_success_response([
+        'executionTime' => microtime(true) - $start_timer,
+        'data' => $product_data,
+    ]);
 }

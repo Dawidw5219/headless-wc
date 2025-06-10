@@ -77,7 +77,7 @@ function headlesswc_domain_whitelist_callback()
 {
     $value = get_option('headlesswc_domain_whitelist', '');
     echo '<textarea name="headlesswc_domain_whitelist" rows="5" cols="50" class="large-text">' . esc_textarea($value) . '</textarea>';
-    echo '<p class="description">' . __('Enter allowed domains one per line (e.g., example.com). Leave empty to allow all domains.', 'headless-wc') . '</p>';
+    echo '<p class="description">' . __('Enter allowed domains one per line (e.g., example.com). Always specify the exact domains that will access this API for security. Leaving this field empty allows ALL domains - use only for testing!', 'headless-wc') . '</p>';
 }
 
 function headlesswc_cache_revalidation_url_callback()
@@ -85,7 +85,7 @@ function headlesswc_cache_revalidation_url_callback()
     $value = get_option('headlesswc_cache_revalidation_url', '');
     echo '<input type="url" name="headlesswc_cache_revalidation_url" value="' . esc_attr($value) . '" class="large-text" placeholder="https://yourapp.com/api/revalidate" />';
     echo '<p class="description">' . __('Optional: URL endpoint for cache revalidation. When a product is updated, HeadlessWC will automatically call this URL with product details to trigger cache refresh in your frontend application.', 'headless-wc') . '</p>';
-    echo '<p class="description"><strong>' . __('How it works:', 'headless-wc') . '</strong> ' . __('After any product change, a GET request will be sent to your URL with query parameters: <code>?slug=product-slug&id=123</code>', 'headless-wc') . '</p>';
+    echo '<p class="description"><strong>' . __('How it works:', 'headless-wc') . '</strong> ' . __('After any product change, a GET request will be sent to your URL with query parameters: <code>?slug=product-slug&id=123&type=product</code>', 'headless-wc') . '</p>';
     echo '<p class="description"><strong>' . __('Use case:', 'headless-wc') . '</strong> ' . __('Perfect for Next.js ISR (Incremental Static Regeneration), Gatsby, or any frontend that supports on-demand cache revalidation.', 'headless-wc') . '</p>';
     echo '<p class="description"><strong>' . __('Leave empty to disable this feature.', 'headless-wc') . '</strong></p>';
 }
@@ -113,23 +113,52 @@ function headlesswc_is_domain_allowed()
 {
     $whitelist = get_option('headlesswc_domain_whitelist', '');
 
-    // If whitelist is empty, allow all domains
+    // If whitelist is empty, allow all domains (no restrictions)
     if (empty(trim($whitelist))) {
         return true;
     }
 
-    $allowed_domains = array_filter(array_map('trim', explode("\n", $whitelist)));
+    // Get request domain
     $request_origin = $_SERVER['HTTP_ORIGIN'] ?? $_SERVER['HTTP_REFERER'] ?? '';
 
+    // If no origin/referer header and whitelist is set, deny access
     if (empty($request_origin)) {
         return false;
     }
 
     $request_domain = parse_url($request_origin, PHP_URL_HOST);
+    if (!$request_domain) {
+        return false;
+    }
 
+    // Always allow WordPress site domain (exact match only)
+    $site_url = get_site_url();
+    $site_domain = parse_url($site_url, PHP_URL_HOST);
+    if ($site_domain && $request_domain === $site_domain) {
+        return true;
+    }
+
+    // Process whitelist domains
+    $allowed_domains = array_filter(array_map('trim', explode("\n", $whitelist)));
+
+    // Check if request domain matches any allowed domain
     foreach ($allowed_domains as $domain) {
-        if ($request_domain === $domain || substr($request_domain, - (strlen($domain) + 1)) === '.' . $domain) {
+        $domain = trim($domain);
+        if (empty($domain)) {
+            continue;
+        }
+
+        // Exact match
+        if ($request_domain === $domain) {
             return true;
+        }
+
+        // If whitelist domain has no subdomain (only 2 parts: domain.com), allow subdomains
+        $domain_parts = explode('.', $domain);
+        if (count($domain_parts) <= 2) {
+            if (substr($request_domain, - (strlen($domain) + 1)) === '.' . $domain) {
+                return true;
+            }
         }
     }
 

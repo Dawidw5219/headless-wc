@@ -57,15 +57,11 @@ function headlesswc_handle_products_request(WP_REST_Request $request)
         $products[] = $product_data;
     }
 
-    return new WP_REST_Response(
-        array(
-            'success' => true,
-            'currentPage' => $args['paged'],
-            'executionTime' => microtime(true) - $start_timer,
-            'totalPages' => $query->max_num_pages,
-            'totalProducts' => $query->found_posts,
-            'data' => $products,
-        ),
-        200
-    );
+    return headlesswc_success_response([
+        'currentPage' => $args['paged'],
+        'executionTime' => microtime(true) - $start_timer,
+        'totalPages' => $query->max_num_pages,
+        'totalProducts' => $query->found_posts,
+        'data' => $products,
+    ]);
 }

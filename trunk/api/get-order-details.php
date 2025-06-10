@@ -10,17 +10,28 @@ function headlesswc_handle_order_details_request(WP_REST_Request $request)
         $order_key = sanitize_text_field($request->get_param('key') ?? '');
 
         if (! $order_id || ! $order_key) {
-            return new WP_REST_Response(['error' => 'Missing order ID or order key'], 400);
+            return headlesswc_error_response(
+                'Brak ID zamówienia lub klucza zamówienia',
+                HeadlessWC_Error_Codes::MISSING_ORDER_DATA
+            );
         }
 
         $order = wc_get_order($order_id);
         if (! $order) {
-            return new WP_REST_Response(['error' => 'Order not found'], 404);
+            return headlesswc_error_response(
+                'Zamówienie nie zostało znalezione',
+                HeadlessWC_Error_Codes::ORDER_NOT_FOUND,
+                404
+            );
         }
 
         // Verify order key matches
         if ($order->get_order_key() !== $order_key) {
-            return new WP_REST_Response(['error' => 'Invalid order key'], 403);
+            return headlesswc_error_response(
+                'Nieprawidłowy klucz zamówienia',
+                HeadlessWC_Error_Codes::INVALID_ORDER_KEY,
+                403
+            );
         }
 
         // Prepare order items
@@ -98,13 +109,14 @@ function headlesswc_handle_order_details_request(WP_REST_Request $request)
             $order_data['custom_fields'] = $custom_fields;
         }
 
-        $response_data = array(
-            'success' => true,
+        return headlesswc_success_response([
             'order' => $order_data,
-        );
-
-        return new WP_REST_Response($response_data, 200);
+        ]);
     } catch (Exception $e) {
-        return new WP_REST_Response(['error' => 'An error occurred: ' . $e->getMessage()], 500);
+        return headlesswc_error_response(
+            'Wystąpił nieoczekiwany błąd: ' . $e->getMessage(),
+            HeadlessWC_Error_Codes::UNEXPECTED_ERROR,
+            500
+        );
     }
 }

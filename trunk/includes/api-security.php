@@ -31,12 +31,9 @@ function headlesswc_check_api_permissions($result, $server, $request)
 
     // To nasz endpoint - sprawdź uprawnienia domenowe
     if (!headlesswc_is_domain_allowed()) {
-        return new WP_REST_Response(
-            array(
-                'success' => false,
-                'error' => 'Forbidden: Domain not whitelisted',
-                'code' => 'domain_not_allowed'
-            ),
+        return headlesswc_error_response(
+            'Dostęp zabroniony: Domena nie jest na białej liście',
+            HeadlessWC_Error_Codes::DOMAIN_NOT_ALLOWED,
             403
         );
     }
@@ -63,12 +60,9 @@ function headlesswc_check_woocommerce_active($result, $server, $request)
 
     // Sprawdź czy WooCommerce jest aktywny
     if (!class_exists('WooCommerce')) {
-        return new WP_REST_Response(
-            array(
-                'success' => false,
-                'error' => 'WooCommerce is required but not active',
-                'code' => 'woocommerce_not_active'
-            ),
+        return headlesswc_error_response(
+            'WooCommerce jest wymagany, ale nie jest aktywny',
+            HeadlessWC_Error_Codes::WOOCOMMERCE_NOT_ACTIVE,
             503
         );
     }

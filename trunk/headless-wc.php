@@ -5,7 +5,7 @@
  * Text Domain: headless - wc
  * Domain Path: /languages
  * Description: Custom WC endpoints for headless checkout
- * Version: 1.2.1
+ * Version: 1.2.2
  * Author: Dawid Wiewiórski
  * License: GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -25,6 +25,7 @@ require_once HEADLESSWC_PATH . 'includes/redirect_after_order.php';
 require_once HEADLESSWC_PATH . 'includes/admin-settings.php';
 require_once HEADLESSWC_PATH . 'includes/api-security.php';
 require_once HEADLESSWC_PATH . 'includes/cache-revalidation.php';
+require_once HEADLESSWC_PATH . 'includes/cart-helpers.php';
 require_once HEADLESSWC_PATH . 'includes/api-routes.php';
 require_once HEADLESSWC_PATH . 'api/create-cart.php';
 require_once HEADLESSWC_PATH . 'api/create-order.php';
@@ -34,6 +35,7 @@ require_once HEADLESSWC_PATH . 'api/get-single-product.php';
 require_once HEADLESSWC_PATH . 'classes/product.php';
 require_once HEADLESSWC_PATH . 'classes/product-detailed.php';
 require_once HEADLESSWC_PATH . 'classes/cart-product.php';
+require_once HEADLESSWC_PATH . 'utilities/api-response.php';
 require_once HEADLESSWC_PATH . 'utilities/get-attributes-data.php';
 require_once HEADLESSWC_PATH . 'utilities/get-attributes.php';
 require_once HEADLESSWC_PATH . 'utilities/get-gallery-images.php';
