@@ -77,7 +77,13 @@ function headlesswc_domain_whitelist_callback()
 {
     $value = get_option('headlesswc_domain_whitelist', '');
     echo '<textarea name="headlesswc_domain_whitelist" rows="5" cols="50" class="large-text">' . esc_textarea($value) . '</textarea>';
-    echo '<p class="description">' . __('Enter allowed domains one per line (e.g., example.com). Always specify the exact domains that will access this API for security. Leaving this field empty allows ALL domains - use only for testing!', 'headless-wc') . '</p>';
+    echo '<p class="description">' . __('Enter allowed domains or IP addresses one per line (e.g., example.com or 83.25.131.249). Always specify the exact domains/IPs that will access this API for security. Leaving this field empty allows ALL domains - use only for testing!', 'headless-wc') . '</p>';
+    echo '<p class="description"><strong>' . __('Supported formats:', 'headless-wc') . '</strong></p>';
+    echo '<ul style="margin-left: 20px;">';
+    echo '<li><code>example.com</code> - ' . __('allows subdomains like test.example.com', 'headless-wc') . '</li>';
+    echo '<li><code>sub.example.com</code> - ' . __('allows only exact subdomain', 'headless-wc') . '</li>';
+    echo '<li><code>192.168.1.100</code> - ' . __('allows specific IP address', 'headless-wc') . '</li>';
+    echo '</ul>';
 }
 
 function headlesswc_cache_revalidation_url_callback()
