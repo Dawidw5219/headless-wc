@@ -68,6 +68,8 @@ function headlesswc_security_section_callback()
     echo '<p>' . __('Configure security settings for HeadlessWC API access.', 'headless-wc') . '</p>';
 }
 
+
+
 function headlesswc_cache_section_callback()
 {
     echo '<p>' . __('Configure cache management and performance optimization for your headless frontend.', 'headless-wc') . '</p>';
@@ -97,6 +99,8 @@ function headlesswc_cache_revalidation_url_callback()
     echo '<p class="description"><strong>' . __('Use case:', 'headless-wc') . '</strong> ' . __('Perfect for Next.js ISR (Incremental Static Regeneration), Gatsby, or any frontend that supports on-demand cache revalidation.', 'headless-wc') . '</p>';
     echo '<p class="description"><strong>' . __('Leave empty to disable this feature.', 'headless-wc') . '</strong></p>';
 }
+
+
 
 function headlesswc_settings_page()
 {
@@ -233,6 +237,8 @@ function headlesswc_is_include_order_key_enabled()
 {
     return true; // Zawsze włączone
 }
+
+
 
 /**
  * Pobierz IP klienta z różnych nagłówków
