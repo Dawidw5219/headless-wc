@@ -1,0 +1,123 @@
+@host = https://shop.b2b.intmix.pl
+
+### Register customer – success (200)
+POST {{host}}/wp-json/headless-wc/v1/register HTTP/1.1
+content-type: application/json
+
+{
+  "email": "wiewiorskidawid@gmail.com",
+  "password": "Str0ngP@ssw0rd!",
+  "firstName": "John",
+  "lastName": "Doe",
+  "billing": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone": "+48123123123",
+    "address_1": "Street 1",
+    "city": "Warsaw",
+    "postcode": "00-001",
+    "country": "PL",
+    "email": "wiewiorskidawid@gmail.com"
+  },
+  "shipping": {
+    "first_name": "John",
+    "last_name": "Doe",
+    "address_1": "Street 1",
+    "city": "Warsaw",
+    "postcode": "00-001",
+    "country": "PL"
+  },
+  "meta": {
+    "accepts_marketing": "yes"
+  }
+}
+
+### Register customer – already exists (409)
+POST {{host}}/wp-json/headless-wc/v1/register HTTP/1.1
+content-type: application/json
+Origin: https://frontend.example
+Referer: https://frontend.example/
+
+{
+  "email": "john.doe.reg1@example.com",
+  "password": "Str0ngP@ssw0rd!",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+
+### Register customer – invalid email (400)
+POST {{host}}/wp-json/headless-wc/v1/register HTTP/1.1
+content-type: application/json
+Origin: https://frontend.example
+Referer: https://frontend.example/
+
+{
+  "email": "bad-email",
+  "password": "Str0ngP@ssw0rd!",
+  "firstName": "Jane",
+  "lastName": "Doe"
+}
+
+### Get all products – success (200)
+GET {{host}}/wp-json/headless-wc/v1/products?limit=200 HTTP/1.1
+
+### Get single product by slug or ID – success (200)
+GET {{host}}/wp-json/headless-wc/v1/products/15 HTTP/1.1
+
+### Get single product by slug – success (200)
+GET {{host}}/wp-json/headless-wc/v1/products/sample-product HTTP/1.1
+
+### Create/refresh cart – success (200)
+POST {{host}}/wp-json/headless-wc/v1/cart HTTP/1.1
+content-type: application/json
+
+{
+  "cart": [
+    { "id": 15, "quantity": 1 }
+  ],
+  "couponCode": ""
+}
+
+### Create order – success (200)
+POST {{host}}/wp-json/headless-wc/v1/order HTTP/1.1
+content-type: application/json
+
+{
+  "redirectUrl": "https://frontend.example/thank-you",
+  "cart": [
+    { "id": 15, "quantity": 1 }
+  ],
+  "couponCode": "",
+  "total": 89.99,
+  "shippingMethodId": "",
+  "paymentMethodId": "",
+  "useDifferentShipping": false,
+  "billingFirstName": "John",
+  "billingLastName": "Doe",
+  "billingAddress1": "Street 1",
+  "billingAddress2": "",
+  "billingCity": "Warsaw",
+  "billingState": "",
+  "billingPostcode": "00-001",
+  "billingCountry": "PL",
+  "billingPhone": "+48123123123",
+  "billingEmail": "john@example.com"
+}
+
+@orderId = 1180
+@orderKey = wc_order_example_key
+
+### Get order details – success (200)
+GET {{host}}/wp-json/headless-wc/v1/order/{{orderId}}?key={{orderKey}} HTTP/1.1
+
+### Get all products – ALL at once (limit=-1) – success (200)
+GET {{host}}/wp-json/headless-wc/v1/products?limit=-1 HTTP/1.1
+
+### Get all products – large page (limit=250) – success (200)
+GET {{host}}/wp-json/headless-wc/v1/products?limit=250&page=1 HTTP/1.1
+
+### WP API v2 – posts excerpts (minimal payload, fastest) – success (200)
+GET {{host}}/wp-json/wp/v2/posts?per_page=100&page=1&_fields=id,slug,title,excerpt,date HTTP/1.1
+
+### WP API v2 – single post by slug (excerpt only) – success (200)
+GET {{host}}/wp-json/wp/v2/posts?slug=sample-post&_fields=id,slug,title,excerpt,date HTTP/1.1

@@ -11,7 +11,7 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
         // Sprawdź koszyk PRZED utworzeniem zamówienia
         if (empty($data['cart']) || !is_array($data['cart'])) {
             return headlesswc_error_response(
-                'Koszyk jest pusty lub nieprawidłowy',
+                __('Cart is empty or invalid', 'headless-wc'),
                 HeadlessWC_Error_Codes::CART_EMPTY
             );
         }
@@ -20,14 +20,14 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
         $valid_products = headlesswc_validate_cart_products($data['cart']);
         if (empty($valid_products)) {
             return headlesswc_error_response(
-                'Nie znaleziono prawidłowych produktów w koszyku. Produkty mogą nie istnieć lub mieć nieprawidłowe ilości.',
+                __('No valid products found in cart. Products may not exist or quantities may be invalid.', 'headless-wc'),
                 HeadlessWC_Error_Codes::NO_VALID_PRODUCTS
             );
         }
 
         if (empty($data['redirectUrl'])) {
             return headlesswc_error_response(
-                'Adres przekierowania jest wymagany do przetwarzania płatności',
+                __('Redirect URL is required to process payment', 'headless-wc'),
                 HeadlessWC_Error_Codes::REDIRECT_URL_REQUIRED
             );
         }
@@ -80,7 +80,7 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
             if (!empty($shipping_method_id)) {
                 if (!headlesswc_apply_shipping_method($shipping_method_id, $order)) {
                     return headlesswc_error_response(
-                        'Nieprawidłowa metoda wysyłki: ' . $shipping_method_id,
+                        sprintf(__('Invalid shipping method: %s', 'headless-wc'), $shipping_method_id),
                         HeadlessWC_Error_Codes::INVALID_SHIPPING_METHOD
                     );
                 }
@@ -99,7 +99,7 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
                 $payment_method = array_key_first($available_gateways);
             } else {
                 return headlesswc_error_response(
-                    'Brak dostępnych metod płatności',
+                    __('No available payment methods', 'headless-wc'),
                     HeadlessWC_Error_Codes::NO_PAYMENT_METHODS
                 );
             }
@@ -107,7 +107,7 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
             // Sprawdź czy podana metoda płatności istnieje
             if (!array_key_exists($payment_method, WC()->payment_gateways->payment_gateways())) {
                 return headlesswc_error_response(
-                    'Nieprawidłowa metoda płatności: ' . $payment_method,
+                    sprintf(__('Invalid payment method: %s', 'headless-wc'), $payment_method),
                     HeadlessWC_Error_Codes::INVALID_PAYMENT_METHOD
                 );
             }
@@ -135,7 +135,7 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
         ]);
     } catch (Exception $e) {
         return headlesswc_error_response(
-            'Wystąpił nieoczekiwany błąd: ' . $e->getMessage(),
+            sprintf(__('An unexpected error occurred: %s', 'headless-wc'), $e->getMessage()),
             HeadlessWC_Error_Codes::UNEXPECTED_ERROR,
             500
         );

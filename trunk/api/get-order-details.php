@@ -11,7 +11,7 @@ function headlesswc_handle_order_details_request(WP_REST_Request $request)
 
         if (! $order_id || ! $order_key) {
             return headlesswc_error_response(
-                'Brak ID zamówienia lub klucza zamówienia',
+                __('Missing order ID or order key', 'headless-wc'),
                 HeadlessWC_Error_Codes::MISSING_ORDER_DATA
             );
         }
@@ -19,7 +19,7 @@ function headlesswc_handle_order_details_request(WP_REST_Request $request)
         $order = wc_get_order($order_id);
         if (! $order) {
             return headlesswc_error_response(
-                'Zamówienie nie zostało znalezione',
+                __('Order not found', 'headless-wc'),
                 HeadlessWC_Error_Codes::ORDER_NOT_FOUND,
                 404
             );
@@ -28,7 +28,7 @@ function headlesswc_handle_order_details_request(WP_REST_Request $request)
         // Verify order key matches
         if ($order->get_order_key() !== $order_key) {
             return headlesswc_error_response(
-                'Nieprawidłowy klucz zamówienia',
+                __('Invalid order key', 'headless-wc'),
                 HeadlessWC_Error_Codes::INVALID_ORDER_KEY,
                 403
             );
@@ -114,7 +114,7 @@ function headlesswc_handle_order_details_request(WP_REST_Request $request)
         ]);
     } catch (Exception $e) {
         return headlesswc_error_response(
-            'Wystąpił nieoczekiwany błąd: ' . $e->getMessage(),
+            __('An unexpected error occurred: ', 'headless-wc') . $e->getMessage(),
             HeadlessWC_Error_Codes::UNEXPECTED_ERROR,
             500
         );

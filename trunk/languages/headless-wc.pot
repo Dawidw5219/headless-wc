@@ -1,20 +1,228 @@
-# Copyright (C) 2024 Dawid Wiewiórski
+# Copyright (C) 2025 App4You.dev
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: HeadlessWC: Ultimate eCommerce Decoupler 1.1.0\n"
+"Project-Id-Version: HeadlessWC: Ultimate eCommerce Decoupler 1.3.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/headless-wc\n"
-"POT-Creation-Date: 2024-08-31 14:52:51+00:00\n"
+"POT-Creation-Date: 2025-09-09 19:18:11+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2024-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2025-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Country: United States\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: "
+"__;_e;_x:1,2c;_ex:1,2c;_n:1,2;_nx:1,2,4c;_n_noop:1,2;_nx_noop:1,2,3c;esc_"
+"attr__;esc_html__;esc_attr_e;esc_html_e;esc_attr_x:1,2c;esc_html_x:1,2c;\n"
+"X-Poedit-Basepath: ../\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-Bookmarks: \n"
+"X-Textdomain-Support: yes\n"
 "X-Generator: grunt-wp-i18n 1.0.3\n"
+
+#: api/create-cart.php:115
+msgid "An unexpected error occurred"
+msgstr ""
+
+#: api/create-order.php:14
+msgid "Cart is empty or invalid"
+msgstr ""
+
+#: api/create-order.php:23
+msgid ""
+"No valid products found in cart. Products may not exist or quantities may "
+"be invalid."
+msgstr ""
+
+#: api/create-order.php:30
+msgid "Redirect URL is required to process payment"
+msgstr ""
+
+#: api/create-order.php:83
+msgid "Invalid shipping method: %s"
+msgstr ""
+
+#: api/create-order.php:102
+msgid "No available payment methods"
+msgstr ""
+
+#: api/create-order.php:110
+msgid "Invalid payment method: %s"
+msgstr ""
+
+#: api/create-order.php:138
+msgid "An unexpected error occurred: %s"
+msgstr ""
+
+#: api/get-order-details.php:14
+msgid "Missing order ID or order key"
+msgstr ""
+
+#: api/get-order-details.php:22
+msgid "Order not found"
+msgstr ""
+
+#: api/get-order-details.php:31
+msgid "Invalid order key"
+msgstr ""
+
+#: api/get-order-details.php:117 api/register-customer.php:124
+msgid "An unexpected error occurred: "
+msgstr ""
+
+#: api/get-single-product.php:12
+msgid "Invalid product identifier"
+msgstr ""
+
+#: api/get-single-product.php:37
+msgid "Product not found"
+msgstr ""
+
+#: api/register-customer.php:18
+msgid "API registration is disabled"
+msgstr ""
+
+#: api/register-customer.php:33
+msgid "Invalid email address"
+msgstr ""
+
+#: api/register-customer.php:36
+msgid "User already exists"
+msgstr ""
+
+#: api/register-customer.php:39
+msgid "Password must be at least 8 characters"
+msgstr ""
+
+#: api/register-customer.php:44
+msgid "Failed to create user"
+msgstr ""
+
+#: includes/admin-settings.php:19 includes/admin-settings.php:129
+msgid "HeadlessWC Settings"
+msgstr ""
+
+#: includes/admin-settings.php:20
+msgid "HeadlessWC"
+msgstr ""
+
+#: includes/admin-settings.php:38
+msgid "Security Settings"
+msgstr ""
+
+#: includes/admin-settings.php:45
+msgid "Domain Whitelist"
+msgstr ""
+
+#: includes/admin-settings.php:53
+msgid "Enable Customer Registration API"
+msgstr ""
+
+#: includes/admin-settings.php:61
+msgid "Cache & Performance Settings"
+msgstr ""
+
+#: includes/admin-settings.php:68
+msgid "Cache Revalidation URL"
+msgstr ""
+
+#: includes/admin-settings.php:77
+msgid "Configure security settings for HeadlessWC API access."
+msgstr ""
+
+#: includes/admin-settings.php:84
+msgid ""
+"Configure cache management and performance optimization for your headless "
+"frontend."
+msgstr ""
+
+#: includes/admin-settings.php:91
+msgid ""
+"Enter allowed domains or IP addresses one per line (e.g., example.com or "
+"83.25.131.249). Always specify the exact domains/IPs that will access this "
+"API for security. Leaving this field empty allows ALL domains - use only "
+"for testing!"
+msgstr ""
+
+#: includes/admin-settings.php:93
+msgid "Supported formats:"
+msgstr ""
+
+#: includes/admin-settings.php:95
+msgid "allows subdomains like test.example.com"
+msgstr ""
+
+#: includes/admin-settings.php:96
+msgid "allows only exact subdomain"
+msgstr ""
+
+#: includes/admin-settings.php:97
+msgid "allows specific IPv4 address"
+msgstr ""
+
+#: includes/admin-settings.php:98
+msgid "allows specific IPv6 address"
+msgstr ""
+
+#: includes/admin-settings.php:106
+msgid ""
+"Optional: URL endpoint for cache revalidation. When a product is updated, "
+"HeadlessWC will automatically call this URL with product details to trigger "
+"cache refresh in your frontend application."
+msgstr ""
+
+#: includes/admin-settings.php:107
+msgid "How it works:"
+msgstr ""
+
+#: includes/admin-settings.php:107
+msgid ""
+"After any product change, a GET request will be sent to your URL with query "
+"parameters: <code>?slug=product-slug&id=123&type=product</code>"
+msgstr ""
+
+#: includes/admin-settings.php:108
+msgid "Use case:"
+msgstr ""
+
+#: includes/admin-settings.php:108
+msgid ""
+"Perfect for Next.js ISR (Incremental Static Regeneration), Gatsby, or any "
+"frontend that supports on-demand cache revalidation."
+msgstr ""
+
+#: includes/admin-settings.php:109
+msgid "Leave empty to disable this feature."
+msgstr ""
+
+#: includes/admin-settings.php:118
+msgid "Enable unauthenticated API endpoint to register WooCommerce customers"
+msgstr ""
+
+#: includes/admin-settings.php:120
+msgid ""
+"Warning: Exposes a public registration endpoint. Keep domain whitelist "
+"strict. Only safe, whitelisted meta fields are accepted."
+msgstr ""
+
+#: includes/api-security.php:36
+msgid "Access denied: Domain is not whitelisted"
+msgstr ""
+
+#: includes/api-security.php:65
+msgid "WooCommerce is required but not active"
+msgstr ""
 
 #: includes/check-plugin-requirements.php:21
 msgid "<b>HeadlessWC</b> requires <b>WooCommerce</b> to be installed and activated."
+msgstr ""
+
+#: includes/redirect_after_order.php:66 includes/redirect_after_order.php:463
+msgid "COD order automatically confirmed for headless checkout."
 msgstr ""
 
 #. Plugin Name of the plugin/theme
@@ -22,9 +230,13 @@ msgid "HeadlessWC: Ultimate eCommerce Decoupler"
 msgstr ""
 
 #. Description of the plugin/theme
-msgid "Cu!!!stom WC endpoints for headless checkout"
+msgid "Custom WC endpoints for headless checkout"
 msgstr ""
 
 #. Author of the plugin/theme
-msgid "Dawid Wiewiórski"
+msgid "App4You.dev"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://app4you.dev"
 msgstr ""

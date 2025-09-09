@@ -1,0 +1,184 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: headless-wc\n"
+"POT-Creation-Date: 2025-08-02 00:00+0000\n"
+"PO-Revision-Date: 2025-08-02 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Polish\n"
+"Language: pl_PL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: manual\n"
+
+#: trunk/includes/admin-settings.php
+msgid "HeadlessWC Settings"
+msgstr "Ustawienia HeadlessWC"
+
+#: trunk/includes/admin-settings.php
+msgid "HeadlessWC"
+msgstr "HeadlessWC"
+
+#: trunk/includes/admin-settings.php
+msgid "Security Settings"
+msgstr "Ustawienia bezpieczeństwa"
+
+#: trunk/includes/admin-settings.php
+msgid "Domain Whitelist"
+msgstr "Biała lista domen"
+
+#: trunk/includes/admin-settings.php
+msgid "Enable Customer Registration API"
+msgstr "Włącz API rejestracji klientów"
+
+#: trunk/includes/admin-settings.php
+msgid "Cache & Performance Settings"
+msgstr "Cache i wydajność"
+
+#: trunk/includes/admin-settings.php
+msgid "Cache Revalidation URL"
+msgstr "Adres URL do rewalidacji cache"
+
+#: trunk/includes/admin-settings.php
+msgid "Configure security settings for HeadlessWC API access."
+msgstr "Skonfiguruj ustawienia bezpieczeństwa dostępu do API HeadlessWC."
+
+#: trunk/includes/admin-settings.php
+msgid "Configure cache management and performance optimization for your headless frontend."
+msgstr "Skonfiguruj zarządzanie cache i optymalizację wydajności dla frontendu headless."
+
+#: trunk/includes/admin-settings.php
+msgid "Enter allowed domains or IP addresses one per line (e.g., example.com or 83.25.131.249). Always specify the exact domains/IPs that will access this API for security. Leaving this field empty allows ALL domains - use only for testing!"
+msgstr "Podaj dozwolone domeny lub adresy IP, po jednej na linię (np. example.com lub 83.25.131.249). Zawsze podawaj dokładne domeny/IP mające dostęp do tego API. Pozostawienie pustego pola zezwala na WSZYSTKIE domeny – używaj tylko do testów!"
+
+#: trunk/includes/admin-settings.php
+msgid "Supported formats:"
+msgstr "Obsługiwane formaty:"
+
+#: trunk/includes/admin-settings.php
+msgid "allows subdomains like test.example.com"
+msgstr "zezwala na subdomeny, np. test.example.com"
+
+#: trunk/includes/admin-settings.php
+msgid "allows only exact subdomain"
+msgstr "zezwala wyłącznie na konkretną subdomenę"
+
+#: trunk/includes/admin-settings.php
+msgid "allows specific IPv4 address"
+msgstr "zezwala na konkretny adres IPv4"
+
+#: trunk/includes/admin-settings.php
+msgid "allows specific IPv6 address"
+msgstr "zezwala na konkretny adres IPv6"
+
+#: trunk/includes/admin-settings.php
+msgid "Optional: URL endpoint for cache revalidation. When a product is updated, HeadlessWC will automatically call this URL with product details to trigger cache refresh in your frontend application."
+msgstr "Opcjonalnie: adres URL do rewalidacji cache. Po aktualizacji produktu HeadlessWC automatycznie wywoła ten adres przekazując dane produktu, aby odświeżyć cache we froncie."
+
+#: trunk/includes/admin-settings.php
+msgid "How it works:"
+msgstr "Jak to działa:"
+
+#: trunk/includes/admin-settings.php
+msgid "After any product change, a GET request will be sent to your URL with query parameters: <code>?slug=product-slug&id=123&type=product</code>"
+msgstr "Po każdej zmianie produktu zostanie wysłane żądanie GET na Twój adres z parametrami: <code>?slug=product-slug&id=123&type=product</code>"
+
+#: trunk/includes/admin-settings.php
+msgid "Use case:"
+msgstr "Przykładowe użycie:"
+
+#: trunk/includes/admin-settings.php
+msgid "Perfect for Next.js ISR (Incremental Static Regeneration), Gatsby, or any frontend that supports on-demand cache revalidation."
+msgstr "Idealne dla Next.js ISR, Gatsby lub dowolnego frontendu obsługującego rewalidację cache na żądanie."
+
+#: trunk/includes/admin-settings.php
+msgid "Leave empty to disable this feature."
+msgstr "Pozostaw puste, aby wyłączyć tę funkcję."
+
+#: trunk/includes/admin-settings.php
+msgid "Enable unauthenticated API endpoint to register WooCommerce customers"
+msgstr "Włącz niezautoryzowany endpoint API do rejestracji klientów WooCommerce"
+
+#: trunk/includes/admin-settings.php
+msgid "Warning: Exposes a public registration endpoint. Keep domain whitelist strict. Only safe, whitelisted meta fields are accepted."
+msgstr "Ostrzeżenie: Udostępnia publiczny endpoint rejestracji"
+
+#: trunk/includes/api-security.php
+msgid "Access denied: Domain is not whitelisted"
+msgstr "Odmowa dostępu: domena nie znajduje się na białej liście"
+
+#: trunk/includes/api-security.php
+msgid "WooCommerce is required but not active"
+msgstr "Wymagany jest WooCommerce, ale nie jest aktywny"
+
+#: trunk/api/register-customer.php
+msgid "API registration is disabled"
+msgstr "Rejestracja przez API jest wyłączona"
+
+#: trunk/api/register-customer.php
+msgid "Invalid email address"
+msgstr "Nieprawidłowy adres e-mail"
+
+#: trunk/api/register-customer.php
+msgid "User already exists"
+msgstr "Użytkownik już istnieje"
+
+#: trunk/api/register-customer.php
+msgid "Password must be at least 8 characters"
+msgstr "Hasło musi mieć co najmniej 8 znaków"
+
+#: trunk/api/register-customer.php
+msgid "Failed to create user"
+msgstr "Nie udało się utworzyć użytkownika"
+
+#: trunk/api/register-customer.php trunk/api/get-order-details.php trunk/api/create-cart.php trunk/api/create-order.php trunk/api/get-single-product.php
+msgid "An unexpected error occurred"
+msgstr "Wystąpił nieoczekiwany błąd"
+
+#: trunk/api/create-order.php trunk/api/register-customer.php trunk/api/get-order-details.php
+msgid "An unexpected error occurred: %s"
+msgstr "Wystąpił nieoczekiwany błąd: %s"
+
+#: trunk/api/create-order.php
+msgid "Cart is empty or invalid"
+msgstr "Koszyk jest pusty lub nieprawidłowy"
+
+#: trunk/api/create-order.php
+msgid "No valid products found in cart. Products may not exist or quantities may be invalid."
+msgstr "Nie znaleziono prawidłowych produktów w koszyku. Produkty mogą nie istnieć lub mieć nieprawidłowe ilości."
+
+#: trunk/api/create-order.php
+msgid "Redirect URL is required to process payment"
+msgstr "Adres przekierowania jest wymagany do przetwarzania płatności"
+
+#: trunk/api/create-order.php
+msgid "Invalid shipping method: %s"
+msgstr "Nieprawidłowa metoda wysyłki: %s"
+
+#: trunk/api/create-order.php
+msgid "No available payment methods"
+msgstr "Brak dostępnych metod płatności"
+
+#: trunk/api/create-order.php
+msgid "Invalid payment method: %s"
+msgstr "Nieprawidłowa metoda płatności: %s"
+
+#: trunk/api/get-single-product.php
+msgid "Invalid product identifier"
+msgstr "Nieprawidłowy identyfikator produktu"
+
+#: trunk/api/get-single-product.php
+msgid "Product not found"
+msgstr "Produkt nie został znaleziony"
+
+#: trunk/api/get-order-details.php
+msgid "Missing order ID or order key"
+msgstr "Brak ID zamówienia lub klucza zamówienia"
+
+#: trunk/api/get-order-details.php
+msgid "Order not found"
+msgstr "Zamówienie nie zostało znalezione"
+
+#: trunk/api/get-order-details.php
+msgid "Invalid order key"
+msgstr "Nieprawidłowy klucz zamówienia"

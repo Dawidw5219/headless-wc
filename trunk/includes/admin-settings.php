@@ -31,6 +31,7 @@ function headlesswc_register_settings()
 {
     register_setting('headlesswc_settings', 'headlesswc_domain_whitelist');
     register_setting('headlesswc_settings', 'headlesswc_cache_revalidation_url');
+    register_setting('headlesswc_settings', 'headlesswc_enable_customer_registration');
 
     add_settings_section(
         'headlesswc_security_section',
@@ -43,6 +44,14 @@ function headlesswc_register_settings()
         'headlesswc_domain_whitelist',
         __('Domain Whitelist', 'headless-wc'),
         'headlesswc_domain_whitelist_callback',
+        'headlesswc_settings',
+        'headlesswc_security_section'
+    );
+
+    add_settings_field(
+        'headlesswc_enable_customer_registration',
+        __('Enable Customer Registration API', 'headless-wc'),
+        'headlesswc_enable_customer_registration_callback',
         'headlesswc_settings',
         'headlesswc_security_section'
     );
@@ -98,6 +107,17 @@ function headlesswc_cache_revalidation_url_callback()
     echo '<p class="description"><strong>' . __('How it works:', 'headless-wc') . '</strong> ' . __('After any product change, a GET request will be sent to your URL with query parameters: <code>?slug=product-slug&id=123&type=product</code>', 'headless-wc') . '</p>';
     echo '<p class="description"><strong>' . __('Use case:', 'headless-wc') . '</strong> ' . __('Perfect for Next.js ISR (Incremental Static Regeneration), Gatsby, or any frontend that supports on-demand cache revalidation.', 'headless-wc') . '</p>';
     echo '<p class="description"><strong>' . __('Leave empty to disable this feature.', 'headless-wc') . '</strong></p>';
+}
+
+function headlesswc_enable_customer_registration_callback()
+{
+    $value = get_option('headlesswc_enable_customer_registration', 'no');
+    $checked = $value === 'yes' ? 'checked' : '';
+    echo '<label>';
+    echo '<input type="checkbox" name="headlesswc_enable_customer_registration" value="yes" ' . $checked . ' /> ';
+    echo esc_html__('Enable unauthenticated API endpoint to register WooCommerce customers', 'headless-wc');
+    echo '</label>';
+    echo '<p class="description">' . esc_html__('Warning: Exposes a public registration endpoint. Keep domain whitelist strict. Only safe, whitelisted meta fields are accepted.', 'headless-wc') . '</p>';
 }
 
 

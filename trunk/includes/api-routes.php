@@ -70,5 +70,18 @@ add_action(
                 'permission_callback' => '__return_true',
             )
         );
+
+        register_rest_route(
+            'headless-wc/v1',
+            '/register',
+            array(
+                'methods' => 'POST',
+                'callback' => 'headlesswc_handle_register_customer',
+                'permission_callback' => function () {
+                    // Wymagane: włączone ustawienie + ogólne zabezpieczenia domeną działają w globalnym filtrze
+                    return get_option('headlesswc_enable_customer_registration', 'no') === 'yes';
+                },
+            )
+        );
     }
 );

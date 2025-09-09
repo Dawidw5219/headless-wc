@@ -2,7 +2,7 @@
   "name": "headless-wc",
   "license": "GPL-2.0-or-later",
   "scripts": {
-    "dev": "grunt dev:local",
+    "dev": "grunt dev:ftp",
     "dev:ftp": "grunt dev:ftp",
     "dev:local": "grunt dev:local",
     "build": "grunt build",
@@ -10,7 +10,10 @@
     "git": "git add . && git commit -m 'update' && git push origin main",
     "svnignore:add": "svn propset svn:ignore 'FOLDER_NAME/' .",
     "svnignore:remove": "svn rm --keep-local node_modules",
-    "svnignore:preview": "SVN_EDITOR=nano svn propedit svn:ignore ."
+    "svnignore:preview": "SVN_EDITOR=nano svn propedit svn:ignore .",
+    "i18n:pot": "grunt makepot",
+    "i18n:compile": "msgfmt trunk/languages/headless-wc-pl_PL.po -o trunk/languages/headless-wc-pl_PL.mo",
+    "i18n": "pnpm i18n:pot && pnpm i18n:compile"
   },
   "devDependencies": {
     "dotenv": "^16.4.5",

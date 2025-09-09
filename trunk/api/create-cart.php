@@ -112,7 +112,7 @@ function headlesswc_handle_cart_request(WP_REST_Request $request)
         ]);
     } catch (Exception $e) {
         return headlesswc_error_response(
-            'Wystąpił nieoczekiwany błąd',
+            __('An unexpected error occurred', 'headless-wc'),
             HeadlessWC_Error_Codes::UNEXPECTED_ERROR,
             500
         );

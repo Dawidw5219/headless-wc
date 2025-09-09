@@ -60,4 +60,11 @@ class HeadlessWC_Error_Codes
     const UNEXPECTED_ERROR = 'unexpected_error';
     const DOMAIN_NOT_ALLOWED = 'domain_not_allowed';
     const WOOCOMMERCE_NOT_ACTIVE = 'woocommerce_not_active';
+
+    // Rejestracja
+    const CUSTOMER_REGISTRATION_DISABLED = 'customer_registration_disabled';
+    const INVALID_EMAIL = 'invalid_email';
+    const USER_EXISTS = 'user_exists';
+    const WEAK_PASSWORD = 'weak_password';
+    const CREATE_USER_FAILED = 'create_user_failed';
 }

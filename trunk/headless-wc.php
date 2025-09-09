@@ -1,11 +1,10 @@
 <?php
-
 /**
  * Plugin Name: HeadlessWC: Ultimate eCommerce Decoupler
- * Text Domain: headless - wc
+ * Text Domain: headless-wc
  * Domain Path: /languages
  * Description: Custom WC endpoints for headless checkout
- * Version: 1.3.0
+ * Version: 1.3.3
  * Author: App4You.dev
  * Author URI: https://app4you.dev
  * License: GPLv2 or later
@@ -15,7 +14,7 @@
 
 // Exit if accessed directly.
 if (! defined('ABSPATH')) {
-    exit;
+	exit;
 }
 
 define('HEADLESSWC_PATH', plugin_dir_path(__FILE__));
@@ -34,6 +33,7 @@ require_once HEADLESSWC_PATH . 'api/create-order.php';
 require_once HEADLESSWC_PATH . 'api/get-order-details.php';
 require_once HEADLESSWC_PATH . 'api/get-all-products.php';
 require_once HEADLESSWC_PATH . 'api/get-single-product.php';
+require_once HEADLESSWC_PATH . 'api/register-customer.php';
 require_once HEADLESSWC_PATH . 'classes/product.php';
 require_once HEADLESSWC_PATH . 'classes/product-detailed.php';
 require_once HEADLESSWC_PATH . 'classes/cart-product.php';
@@ -50,3 +50,7 @@ require_once HEADLESSWC_PATH . 'utilities/nvl.php';
 
 add_action('plugins_loaded', 'headlesswc_check_plugin_requirements', 0);
 add_action('template_redirect', 'headlesswc_redirect_after_order', 20);
+
+add_action('init', function () {
+	load_plugin_textdomain('headless-wc', false, dirname(HEADLESSWC_BASENAME) . '/languages');
+});

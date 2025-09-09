@@ -9,7 +9,7 @@ function headlesswc_handle_product_request(WP_REST_Request $request)
     $identifier = $request->get_param('slug');
     if (empty($identifier)) {
         return headlesswc_error_response(
-            'Nieprawidłowy identyfikator produktu',
+            __('Invalid product identifier', 'headless-wc'),
             HeadlessWC_Error_Codes::INVALID_PRODUCTS
         );
     }
@@ -34,7 +34,7 @@ function headlesswc_handle_product_request(WP_REST_Request $request)
     $products = $query->posts;
     if (empty($products)) {
         return headlesswc_error_response(
-            'Produkt nie został znaleziony',
+            __('Product not found', 'headless-wc'),
             HeadlessWC_Error_Codes::PRODUCT_NOT_FOUND,
             404
         );
