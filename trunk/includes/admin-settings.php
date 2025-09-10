@@ -32,6 +32,7 @@ function headlesswc_register_settings()
     register_setting('headlesswc_settings', 'headlesswc_domain_whitelist');
     register_setting('headlesswc_settings', 'headlesswc_cache_revalidation_url');
     register_setting('headlesswc_settings', 'headlesswc_enable_customer_registration');
+    register_setting('headlesswc_settings', 'headlesswc_meta_whitelist');
 
     add_settings_section(
         'headlesswc_security_section',
@@ -70,6 +71,21 @@ function headlesswc_register_settings()
         'headlesswc_settings',
         'headlesswc_cache_section'
     );
+
+    add_settings_section(
+        'headlesswc_api_section',
+        __('API Data Settings', 'headless-wc'),
+        'headlesswc_api_section_callback',
+        'headlesswc_settings'
+    );
+
+    add_settings_field(
+        'headlesswc_meta_whitelist',
+        __('Product Meta Data Whitelist', 'headless-wc'),
+        'headlesswc_meta_whitelist_callback',
+        'headlesswc_settings',
+        'headlesswc_api_section'
+    );
 }
 
 function headlesswc_security_section_callback()
@@ -82,6 +98,11 @@ function headlesswc_security_section_callback()
 function headlesswc_cache_section_callback()
 {
     echo '<p>' . __('Configure cache management and performance optimization for your headless frontend.', 'headless-wc') . '</p>';
+}
+
+function headlesswc_api_section_callback()
+{
+    echo '<p>' . __('Configure which data is returned by HeadlessWC API endpoints.', 'headless-wc') . '</p>';
 }
 
 function headlesswc_domain_whitelist_callback()
@@ -118,6 +139,55 @@ function headlesswc_enable_customer_registration_callback()
     echo esc_html__('Enable unauthenticated API endpoint to register WooCommerce customers', 'headless-wc');
     echo '</label>';
     echo '<p class="description">' . esc_html__('Warning: Exposes a public registration endpoint. Keep domain whitelist strict. Only safe, whitelisted meta fields are accepted.', 'headless-wc') . '</p>';
+}
+
+function headlesswc_meta_whitelist_callback()
+{
+    $value = get_option('headlesswc_meta_whitelist', '');
+    echo '<textarea name="headlesswc_meta_whitelist" rows="10" cols="50" class="large-text" placeholder="_custom_field1, _yoast_wpseo_title, product_custom_data">' . esc_textarea($value) . '</textarea>';
+    
+    // Opis podstawowy
+    echo '<p class="description">';
+    echo __('Configure which product meta fields should be included in detailed product API responses (get-single-product endpoint). Leave empty for maximum security - no meta data will be returned.', 'headless-wc');
+    echo '<br><strong>' . __('Konfiguruj które meta pola produktów mają być zwracane w szczegółowych odpowiedziach API (endpoint get-single-product). Pozostaw puste dla maksymalnego bezpieczeństwa - żadne meta dane nie będą zwracane.', 'headless-wc') . '</strong>';
+    echo '</p>';
+    
+    // Przykłady użycia
+    echo '<p class="description"><strong>' . __('Usage Examples / Przykłady użycia:', 'headless-wc') . '</strong></p>';
+    echo '<ul style="margin-left: 20px;">';
+    echo '<li><strong>' . __('Specific fields:', 'headless-wc') . '</strong> <code>_yoast_wpseo_title, _custom_badge, product_video_url</code></li>';
+    echo '<li><strong>' . __('All fields (DANGEROUS):', 'headless-wc') . '</strong> <code>*</code> - ' . __('Returns ALL meta data including potentially sensitive information', 'headless-wc') . '</li>';
+    echo '<li><strong>' . __('Empty (RECOMMENDED):', 'headless-wc') . '</strong> ' . __('No meta data returned - safest option', 'headless-wc') . '</li>';
+    echo '</ul>';
+    
+    // Popularne pola meta
+    echo '<p class="description"><strong>' . __('Common Meta Fields / Popularne Pola Meta:', 'headless-wc') . '</strong></p>';
+    echo '<ul style="margin-left: 20px;">';
+    echo '<li><code>_yoast_wpseo_title</code> - ' . __('Yoast SEO title / Tytuł SEO Yoast', 'headless-wc') . '</li>';
+    echo '<li><code>_yoast_wpseo_metadesc</code> - ' . __('Yoast SEO description / Opis SEO Yoast', 'headless-wc') . '</li>';
+    echo '<li><code>_product_video_url</code> - ' . __('Product video URL / URL wideo produktu', 'headless-wc') . '</li>';
+    echo '<li><code>_custom_badge</code> - ' . __('Custom product badges / Własne odznaki produktu', 'headless-wc') . '</li>';
+    echo '<li><code>field_name</code> - ' . __('ACF field name / Nazwa pola ACF', 'headless-wc') . '</li>';
+    echo '<li><code>_product_subtitle</code> - ' . __('Product subtitle / Podtytuł produktu', 'headless-wc') . '</li>';
+    echo '</ul>';
+    
+    // Ostrzeżenia bezpieczeństwa
+    echo '<div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 10px 0; border-radius: 4px;">';
+    echo '<p style="margin: 0;"><strong>⚠️ ' . __('SECURITY WARNING / OSTRZEŻENIE BEZPIECZEŃSTWA', 'headless-wc') . '</strong></p>';
+    echo '<p style="margin: 5px 0 0 0;">';
+    echo __('Using "*" exposes ALL product meta data publicly, including potentially sensitive information like internal configurations, private notes, or system data. Only use for development/testing!', 'headless-wc');
+    echo '<br><strong>' . __('Używanie "*" ujawnia WSZYSTKIE meta dane produktów publicznie, włączając potencjalnie wrażliwe informacje jak wewnętrzne konfiguracje, prywatne notatki czy dane systemowe. Używaj tylko do developmentu/testów!', 'headless-wc') . '</strong>';
+    echo '</p>';
+    echo '</div>';
+    
+    // Zalecenia
+    echo '<p class="description"><strong>' . __('Best Practices / Najlepsze Praktyki:', 'headless-wc') . '</strong></p>';
+    echo '<ul style="margin-left: 20px;">';
+    echo '<li>' . __('Always specify exact field names you need', 'headless-wc') . ' / ' . __('Zawsze podawaj dokładne nazwy pól których potrzebujesz', 'headless-wc') . '</li>';
+    echo '<li>' . __('Never expose sensitive data like passwords, API keys, or internal IDs', 'headless-wc') . ' / ' . __('Nigdy nie ujawniaj wrażliwych danych jak hasła, klucze API czy wewnętrzne ID', 'headless-wc') . '</li>';
+    echo '<li>' . __('Test with empty field first (safest)', 'headless-wc') . ' / ' . __('Testuj najpierw z pustym polem (najbezpieczniej)', 'headless-wc') . '</li>';
+    echo '<li>' . __('Use "*" only in development environments', 'headless-wc') . ' / ' . __('Używaj "*" tylko w środowiskach deweloperskich', 'headless-wc') . '</li>';
+    echo '</ul>';
 }
 
 
