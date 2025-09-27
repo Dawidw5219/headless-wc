@@ -88,6 +88,36 @@ function headlesswc_handle_register_customer(WP_REST_Request $request)
 			$user->set_role('customer');
 		}
 
+		// Trigger WooCommerce emails according to WooCommerce settings
+		// - Customer: "New account" (WC email, respects enable/disable)
+		// - Admin: core WordPress admin notification about new user
+		if (class_exists('WooCommerce') && function_exists('WC')) {
+			$mailer = WC()->mailer();
+			if ($mailer && method_exists($mailer, 'get_emails')) {
+				$emails = $mailer->get_emails();
+				// Find and trigger the customer new account email if enabled
+				foreach ((array)$emails as $email_instance) {
+					if (
+						is_object($email_instance)
+						&& property_exists($email_instance, 'id')
+						&& $email_instance->id === 'customer_new_account'
+						&& method_exists($email_instance, 'is_enabled')
+						&& $email_instance->is_enabled()
+						&& method_exists($email_instance, 'trigger')
+					) {
+						$email_instance->trigger($user_id, $password, $user);
+						break;
+					}
+				}
+			}
+		}
+
+		// Send admin notification via WordPress core (separate from WooCommerce customer email)
+		if (function_exists('wp_new_user_notification')) {
+			// Notify only admin here to avoid duplicate customer emails
+			wp_new_user_notification($user_id, null, 'admin');
+		}
+
 		return headlesswc_success_response([
 			'userId' => $user_id,
 			'email' => $email,

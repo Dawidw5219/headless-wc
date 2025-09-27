@@ -73,13 +73,16 @@ GET {{host}}/wp-json/headless-wc/v1/products/15 HTTP/1.1
 ### Get single product by slug – success (200)
 GET {{host}}/wp-json/headless-wc/v1/products/sample-product HTTP/1.1
 
+### Get products – with filters (200)
+GET {{host}}/wp-json/headless-wc/v1/products?limit=24&page=1&search=lamp&category=oswietlenie,led&min_price=50&max_price=300&orderby=price&order=ASC HTTP/1.1
+
 ### Create/refresh cart – success (200)
 POST {{host}}/wp-json/headless-wc/v1/cart HTTP/1.1
 content-type: application/json
 
 {
   "cart": [
-    { "id": 15, "quantity": 1 }
+    { "id": 217, "quantity": 1 }
   ],
   "couponCode": ""
 }
@@ -135,11 +138,114 @@ content-type: application/json
 ### Get order details – success (200)
 GET {{host}}/wp-json/headless-wc/v1/order/{{orderId}}?key={{orderKey}} HTTP/1.1
 
+### Get order details – invalid key (403)
+GET {{host}}/wp-json/headless-wc/v1/order/{{orderId}}?key=bad_key HTTP/1.1
+
+### Get order details – not found (404)
+GET {{host}}/wp-json/headless-wc/v1/order/999999?key={{orderKey}} HTTP/1.1
+
 ### Get all products – ALL at once (limit=-1) – success (200)
 GET {{host}}/wp-json/headless-wc/v1/products?limit=-1 HTTP/1.1
 
 ### Get all products – large page (limit=250) – success (200)
 GET {{host}}/wp-json/headless-wc/v1/products?limit=250&page=1 HTTP/1.1
+
+### Create order – different shipping (200)
+POST {{host}}/wp-json/headless-wc/v1/order HTTP/1.1
+content-type: application/json
+
+{
+  "redirectUrl": "https://frontend.example/thank-you",
+  "cart": [
+    { "id": 15, "quantity": 1 }
+  ],
+  "couponCode": "",
+  "total": 129.99,
+  "shippingMethodId": "flat_rate:1",
+  "paymentMethodId": "bacs",
+  "useDifferentShipping": true,
+  "billing": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "company": "",
+    "phone": "+48123123123",
+    "address1": "Street 1",
+    "address2": "",
+    "city": "Warsaw",
+    "postcode": "00-001",
+    "country": "PL",
+    "state": "",
+    "email": "john@example.com"
+  },
+  "shipping": {
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "company": "",
+    "phone": "+48123123124",
+    "address1": "Delivery 9",
+    "address2": "",
+    "city": "Krakow",
+    "postcode": "30-001",
+    "country": "PL",
+    "state": "",
+    "email": "jane@example.com"
+  }
+}
+
+### Create order – missing redirectUrl (400)
+POST {{host}}/wp-json/headless-wc/v1/order HTTP/1.1
+content-type: application/json
+
+{
+  "cart": [ { "id": 15, "quantity": 1 } ],
+  "billing": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "address1": "Street 1",
+    "city": "Warsaw",
+    "postcode": "00-001",
+    "country": "PL",
+    "email": "john@example.com"
+  }
+}
+
+### Create order – invalid shipping method (400)
+POST {{host}}/wp-json/headless-wc/v1/order HTTP/1.1
+content-type: application/json
+
+{
+  "redirectUrl": "https://frontend.example/thank-you",
+  "cart": [ { "id": 15, "quantity": 1 } ],
+  "shippingMethodId": "flat_rate:99999",
+  "billing": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "address1": "Street 1",
+    "city": "Warsaw",
+    "postcode": "00-001",
+    "country": "PL",
+    "email": "john@example.com"
+  }
+}
+
+### Create order – invalid payment method (400)
+POST {{host}}/wp-json/headless-wc/v1/order HTTP/1.1
+content-type: application/json
+
+{
+  "redirectUrl": "https://frontend.example/thank-you",
+  "cart": [ { "id": 15, "quantity": 1 } ],
+  "paymentMethodId": "non_existing_gateway",
+  "billing": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "address1": "Street 1",
+    "city": "Warsaw",
+    "postcode": "00-001",
+    "country": "PL",
+    "email": "john@example.com"
+  }
+}
 
 ### WP API v2 – posts excerpts (minimal payload, fastest) – success (200)
 GET {{host}}/wp-json/wp/v2/posts?per_page=100&page=1&_fields=id,slug,title,excerpt,date HTTP/1.1

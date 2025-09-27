@@ -93,7 +93,7 @@ function headlesswc_handle_order_details_request(WP_REST_Request $request)
         );
 
         // Add custom fields if any
-        $custom_fields = array();
+        $meta = array();
         $meta_data = $order->get_meta_data();
         foreach ($meta_data as $meta) {
             $key = $meta->key;
@@ -101,12 +101,12 @@ function headlesswc_handle_order_details_request(WP_REST_Request $request)
 
             // Skip internal WooCommerce meta and our headlesswc_redirect_url
             if (substr($key, 0, 1) !== '_' && $key !== 'headlesswc_redirect_url') {
-                $custom_fields[$key] = $value;
+                $meta[$key] = $value;
             }
         }
 
-        if (! empty($custom_fields)) {
-            $order_data['custom_fields'] = $custom_fields;
+        if (! empty($meta)) {
+            $order_data['meta'] = $meta;
         }
 
         return headlesswc_success_response([
