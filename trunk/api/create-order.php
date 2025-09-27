@@ -38,8 +38,8 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
         update_post_meta($order->get_id(), '_terms_accepted', 'yes');
 
         // Obsługa customowych pól
-        if (! empty($data['customFields']) && is_array($data['customFields'])) {
-            foreach ($data['customFields'] as $key => $value) {
+        if (! empty($data['meta']) && is_array($data['meta'])) {
+            foreach ($data['meta'] as $key => $value) {
                 // Walidacja klucza - tylko alfanumeryczne znaki i podkreślenia
                 $sanitized_key = sanitize_key($key);
                 if (empty($sanitized_key) || strlen($sanitized_key) > 50) {
@@ -68,8 +68,14 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
         // Dodaj produkty do zamówienia (już zwalidowane)
         headlesswc_apply_cart_products($valid_products, $order);
 
-        $order->set_address(headlesswc_map_customer_data($data), 'billing');
-        $order->set_address(! empty($data['useDifferentShipping']) ? headlesswc_map_customer_data($data, true) : headlesswc_map_customer_data($data), 'shipping');
+        // Breaking change: expect nested billing/shipping objects
+        $order->set_address(headlesswc_map_customer_data($data, false, 'order'), 'billing');
+        $order->set_address(
+            ! empty($data['useDifferentShipping'])
+                ? headlesswc_map_customer_data($data, true, 'order')
+                : headlesswc_map_customer_data(['shipping' => $data['billing'] ?? []], true, 'order'),
+            'shipping'
+        );
 
         // Sprawdź czy zamówienie zawiera tylko produkty wirtualne
         $is_virtual_order = headlesswc_is_virtual_order($order);
@@ -142,23 +148,6 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
     }
 }
 
-function headlesswc_map_customer_data($data, $is_shipping = false)
-{
-    $prefix = $is_shipping ? 'shipping' : 'billing';
-    return [
-        'first_name' => sanitize_text_field($data[$prefix . 'FirstName'] ?? ''),
-        'last_name' => sanitize_text_field($data[$prefix . 'LastName'] ?? ''),
-        'company' => sanitize_text_field($data[$prefix . 'Company'] ?? ''),
-        'email' => sanitize_email($data[$prefix . 'Email'] ?? ''),
-        'phone' => sanitize_text_field($data[$prefix . 'Phone'] ?? ''),
-        'address_1' => sanitize_text_field($data[$prefix . 'Address1'] ?? ''),
-        'address_2' => sanitize_text_field($data[$prefix . 'Address2'] ?? ''),
-        'city' => sanitize_text_field($data[$prefix . 'City'] ?? ''),
-        'state' => sanitize_text_field($data[$prefix . 'State'] ?? ''),
-        'postcode' => sanitize_text_field($data[$prefix . 'Postcode'] ?? ''),
-        'country' => sanitize_text_field($data[$prefix . 'Country'] ?? ''),
-    ];
-}
 
 
 function headlesswc_apply_shipping_method($shipping_method_id, $order)

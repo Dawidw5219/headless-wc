@@ -1,10 +1,11 @@
 <?php
+
 /**
  * Plugin Name: HeadlessWC: Ultimate eCommerce Decoupler
  * Text Domain: headless-wc
  * Domain Path: /languages
  * Description: Custom WC endpoints for headless checkout
- * Version: 1.3.3
+ * Version: 1.3.4
  * Author: App4You.dev
  * Author URI: https://app4you.dev
  * License: GPLv2 or later
@@ -46,6 +47,7 @@ require_once HEADLESSWC_PATH . 'utilities/get-meta-data.php';
 require_once HEADLESSWC_PATH . 'utilities/get-regular-price.php';
 require_once HEADLESSWC_PATH . 'utilities/get-sale-price.php';
 require_once HEADLESSWC_PATH . 'utilities/nvl.php';
+require_once HEADLESSWC_PATH . 'utilities/customer-data-mapper.php';
 
 
 add_action('plugins_loaded', 'headlesswc_check_plugin_requirements', 0);

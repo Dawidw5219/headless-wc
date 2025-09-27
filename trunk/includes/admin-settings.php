@@ -145,16 +145,16 @@ function headlesswc_meta_whitelist_callback()
 {
     $value = get_option('headlesswc_meta_whitelist', '');
     echo '<textarea name="headlesswc_meta_whitelist" rows="8" cols="50" class="large-text" placeholder="_custom_field1, _yoast_wpseo_title, product_custom_data">' . esc_textarea($value) . '</textarea>';
-    
+
     echo '<p class="description">' . __('Konfiguruj które meta pola produktów mają być zwracane w szczegółowych odpowiedziach API (endpoint get-single-product). Pozostaw puste dla maksymalnego bezpieczeństwa - żadne meta dane nie będą zwracane.', 'headless-wc') . '</p>';
-    
+
     echo '<p class="description"><strong>' . __('Przykłady użycia:', 'headless-wc') . '</strong></p>';
     echo '<ul style="margin-left: 20px;">';
     echo '<li><strong>' . __('Konkretne pola:', 'headless-wc') . '</strong> <code>_yoast_wpseo_title, _custom_badge, product_video_url</code></li>';
     echo '<li><strong>' . __('Wszystkie pola (NIEBEZPIECZNE):', 'headless-wc') . '</strong> <code>*</code> - ' . __('zwraca WSZYSTKIE meta dane włączając potencjalnie wrażliwe informacje', 'headless-wc') . '</li>';
     echo '<li><strong>' . __('Puste pole (ZALECANE):', 'headless-wc') . '</strong> ' . __('brak meta danych - najbezpieczniejsza opcja', 'headless-wc') . '</li>';
     echo '</ul>';
-    
+
     echo '<p class="description"><strong>' . __('Popularne pola meta:', 'headless-wc') . '</strong></p>';
     echo '<ul style="margin-left: 20px;">';
     echo '<li><code>_yoast_wpseo_title</code> - ' . __('Tytuł SEO Yoast', 'headless-wc') . '</li>';
@@ -164,9 +164,9 @@ function headlesswc_meta_whitelist_callback()
     echo '<li><code>field_name</code> - ' . __('Nazwa pola ACF', 'headless-wc') . '</li>';
     echo '<li><code>_product_subtitle</code> - ' . __('Podtytuł produktu', 'headless-wc') . '</li>';
     echo '</ul>';
-    
+
     echo '<p class="description"><strong>' . __('OSTRZEŻENIE BEZPIECZEŃSTWA:', 'headless-wc') . '</strong> ' . __('Używanie "*" ujawnia WSZYSTKIE meta dane produktów publicznie, włączając potencjalnie wrażliwe informacje jak wewnętrzne konfiguracje, prywatne notatki czy dane systemowe. Używaj tylko do developmentu/testów!', 'headless-wc') . '</p>';
-    
+
     echo '<p class="description"><strong>' . __('Najlepsze praktyki:', 'headless-wc') . '</strong></p>';
     echo '<ul style="margin-left: 20px;">';
     echo '<li>' . __('Zawsze podawaj dokładne nazwy pól których potrzebujesz', 'headless-wc') . '</li>';

@@ -7,7 +7,7 @@ if (! defined('ABSPATH')) {
  * POST /wp-json/headless-wc/v1/register
  * Body JSON:
  * {
- *   email, password, firstName, lastName, username?, billing: {...}, shipping: {...}, meta: { key: value }
+ *   email, password, firstName, lastName, username?, billing: {firstName, lastName, company, phone, address1, address2, city, postcode, country, state, email}, shipping: {firstName, lastName, company, phone, address1, address2, city, postcode, country, state, email}, meta: { key: value }
  * }
  */
 function headlesswc_handle_register_customer(WP_REST_Request $request)
@@ -41,55 +41,29 @@ function headlesswc_handle_register_customer(WP_REST_Request $request)
 
 		$user_id = wc_create_new_customer($email, $username, $password);
 		if (is_wp_error($user_id)) {
-			return headlesswc_error_response(__('Failed to create user', 'headless-wc'), HeadlessWC_Error_Codes::CREATE_USER_FAILED, 500, [ 'details' => $user_id->get_error_message() ]);
+			return headlesswc_error_response(__('Failed to create user', 'headless-wc'), HeadlessWC_Error_Codes::CREATE_USER_FAILED, 500, ['details' => $user_id->get_error_message()]);
 		}
 
 		// Set first and last name
 		update_user_meta($user_id, 'first_name', $first_name);
 		update_user_meta($user_id, 'last_name', $last_name);
 
-		// Map and save addresses (billing/shipping)
+		// Map and save addresses (billing/shipping) using camelCase format
 		$billing = is_array($params['billing'] ?? null) ? $params['billing'] : [];
 		$shipping = is_array($params['shipping'] ?? null) ? $params['shipping'] : [];
 
-		$billing_map = [
-			'first_name' => 'billing_first_name',
-			'last_name' => 'billing_last_name',
-			'company' => 'billing_company',
-			'phone' => 'billing_phone',
-			'address_1' => 'billing_address_1',
-			'address_2' => 'billing_address_2',
-			'city' => 'billing_city',
-			'postcode' => 'billing_postcode',
-			'country' => 'billing_country',
-			'state' => 'billing_state',
-			'email' => 'billing_email',
-		];
-		$shipping_map = [
-			'first_name' => 'shipping_first_name',
-			'last_name' => 'shipping_last_name',
-			'company' => 'shipping_company',
-			'phone' => 'shipping_phone',
-			'address_1' => 'shipping_address_1',
-			'address_2' => 'shipping_address_2',
-			'city' => 'shipping_city',
-			'postcode' => 'shipping_postcode',
-			'country' => 'shipping_country',
-			'state' => 'shipping_state',
-			'email' => 'shipping_email',
-		];
+		// Use utility function to map camelCase data to user meta
+		$billing_meta = headlesswc_map_customer_data($billing, false, 'user_meta');
+		$shipping_meta = headlesswc_map_customer_data($shipping, true, 'user_meta');
 
-		foreach ($billing_map as $key => $meta_key) {
-			if (array_key_exists($key, $billing)) {
-				$value = is_string($billing[$key]) ? sanitize_text_field($billing[$key]) : (string)$billing[$key];
-				update_user_meta($user_id, $meta_key, $value);
-			}
+		// Save billing meta
+		foreach ($billing_meta as $meta_key => $value) {
+			update_user_meta($user_id, $meta_key, $value);
 		}
-		foreach ($shipping_map as $key => $meta_key) {
-			if (array_key_exists($key, $shipping)) {
-				$value = is_string($shipping[$key]) ? sanitize_text_field($shipping[$key]) : (string)$shipping[$key];
-				update_user_meta($user_id, $meta_key, $value);
-			}
+
+		// Save shipping meta
+		foreach ($shipping_meta as $meta_key => $value) {
+			update_user_meta($user_id, $meta_key, $value);
 		}
 
 		// Whitelist user meta

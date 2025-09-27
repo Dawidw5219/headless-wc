@@ -14,7 +14,26 @@ function headlesswc_handle_cart_request(WP_REST_Request $request)
         $discount_total = 0;
 
         // Waliduj produkty używając wspólnej funkcji
-        $valid_products = headlesswc_validate_cart_products($data['cart']);
+        $validation_result = headlesswc_validate_cart_products($data['cart']);
+        $valid_products = $validation_result['products'];
+        $debug_info = $validation_result['debug'];
+
+        // Sprawdź czy którykolwiek produkt wymaga logowania
+        $login_required = false;
+        foreach ($debug_info as $item_debug) {
+            if (isset($item_debug['validation_failed']) && $item_debug['validation_failed'] === 'login_required') {
+                $login_required = true;
+                break;
+            }
+        }
+
+        if ($login_required) {
+            return headlesswc_error_response(
+                __('Account required to purchase products', 'headless-wc'),
+                'LOGIN_REQUIRED',
+                401
+            );
+        }
 
         // Dodaj tylko poprawne produkty do koszyka
         foreach ($valid_products as $product) {
@@ -102,7 +121,7 @@ function headlesswc_handle_cart_request(WP_REST_Request $request)
             'subtotal' => floatval($cart->get_subtotal()),
             'total' => floatval($cart->get_total('edit')),
             'taxTotal' => floatval($cart->get_total_tax()),
-            'shippingTotal' => floatval($shipping_methods[0]['price']),
+            'shippingTotal' => floatval($shipping_methods[0]['price'] ?? 0),
             'discountTotal' => floatval($discount_total),
             'couponCode' => isset($data['couponCode']) ? $data['couponCode'] : '',
             'currency' => $currency,

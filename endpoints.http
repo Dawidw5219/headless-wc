@@ -78,6 +78,22 @@ content-type: application/json
   "couponCode": ""
 }
 
+### Create/refresh cart with Basic Auth – success (200)
+POST {{host}}/wp-json/headless-wc/v1/cart HTTP/1.1
+content-type: application/json
+Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=
+
+{
+  "cart": [
+    { "slug": "kurtyna-3x3-3m-ciepla", "quantity": 1 }
+  ],
+  "couponCode": ""
+}
+
+### Check auth status
+GET {{host}}/wp-json/headless-wc/v1/auth/status HTTP/1.1
+Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=
+
 ### Create order – success (200)
 POST {{host}}/wp-json/headless-wc/v1/order HTTP/1.1
 content-type: application/json
