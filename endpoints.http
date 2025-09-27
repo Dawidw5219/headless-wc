@@ -10,25 +10,31 @@ content-type: application/json
   "firstName": "John",
   "lastName": "Doe",
   "billing": {
-    "first_name": "John",
-    "last_name": "Doe",
+    "firstName": "John",
+    "lastName": "Doe",
     "phone": "+48123123123",
-    "address_1": "Street 1",
+    "address1": "Street 1",
+    "address2": "",
     "city": "Warsaw",
     "postcode": "00-001",
     "country": "PL",
+    "state": "",
     "email": "wiewiorskidawid@gmail.com"
   },
   "shipping": {
-    "first_name": "John",
-    "last_name": "Doe",
-    "address_1": "Street 1",
+    "firstName": "John",
+    "lastName": "Doe",
+    "phone": "+48123123123",
+    "address1": "Street 1",
+    "address2": "",
     "city": "Warsaw",
     "postcode": "00-001",
-    "country": "PL"
+    "country": "PL",
+    "state": "",
+    "email": "wiewiorskidawid@gmail.com"
   },
   "meta": {
-    "accepts_marketing": "yes"
+    "accepts_marketing": true
   }
 }
 
@@ -108,16 +114,19 @@ content-type: application/json
   "shippingMethodId": "",
   "paymentMethodId": "",
   "useDifferentShipping": false,
-  "billingFirstName": "John",
-  "billingLastName": "Doe",
-  "billingAddress1": "Street 1",
-  "billingAddress2": "",
-  "billingCity": "Warsaw",
-  "billingState": "",
-  "billingPostcode": "00-001",
-  "billingCountry": "PL",
-  "billingPhone": "+48123123123",
-  "billingEmail": "john@example.com"
+  "billing": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "company": "",
+    "phone": "+48123123123",
+    "address1": "Street 1",
+    "address2": "",
+    "city": "Warsaw",
+    "postcode": "00-001",
+    "country": "PL",
+    "state": "",
+    "email": "john@example.com"
+  }
 }
 
 @orderId = 1180
