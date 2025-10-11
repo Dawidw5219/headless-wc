@@ -17,7 +17,8 @@ function headlesswc_handle_order_request(WP_REST_Request $request)
         }
 
         // Waliduj produkty w koszyku PRZED utworzeniem zamówienia (pomijaj niepoprawne)
-        $valid_products = headlesswc_validate_cart_products($data['cart']);
+        $validation_result = headlesswc_validate_cart_products($data['cart']);
+        $valid_products = $validation_result['products'];
         if (empty($valid_products)) {
             return headlesswc_error_response(
                 __('No valid products found in cart. Products may not exist or quantities may be invalid.', 'headless-wc'),

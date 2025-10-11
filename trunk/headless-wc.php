@@ -5,7 +5,7 @@
  * Text Domain: headless-wc
  * Domain Path: /languages
  * Description: Custom WC endpoints for headless checkout
- * Version: 1.3.6
+ * Version: 1.3.7
  * Author: App4You.dev
  * Author URI: https://app4you.dev
  * License: GPLv2 or later
